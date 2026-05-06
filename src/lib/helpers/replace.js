@@ -29,7 +29,7 @@ function replaceExistingValue (src, key, originalValue, replaceValue) {
     let newPart = `${key}=${quote}${replaceValue}${quote}`
 
     // if empty quote and consecutive newlines
-    const newlineMatch = src.match(new RegExp(`${key}\\s*=\\s*\n\n`, 'm')) // match any consecutive newline scenario for a blank value
+    const newlineMatch = src.match(new RegExp(`${escapedKey}\\s*=\\s*\n\n`, 'm')) // match any consecutive newline scenario for a blank value
     if (escapedOriginalValue === '' && quote === '' && newlineMatch) {
       const newlineCount = (newlineMatch[0].match(/\n/g)).length - 1
       for (let i = 0; i < newlineCount; i++) {
