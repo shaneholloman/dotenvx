@@ -2,7 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
-[Unreleased](https://github.com/dotenvx/dotenvx/compare/v1.65.1...main)
+[Unreleased](https://github.com/dotenvx/dotenvx/compare/v1.65.2...main)
+
+## [1.65.2](https://github.com/dotenvx/dotenvx/compare/v1.65.1...v1.65.2) (2026-05-13)
+
+### Changed
+
+* Improve spinner message coordination between `dotenvx` and `dotenvx-ops` ([#813](https://github.com/dotenvx/dotenvx/pull/813))
 
 ## [1.65.1](https://github.com/dotenvx/dotenvx/compare/v1.65.0...v1.65.1) (2026-05-13)
 
