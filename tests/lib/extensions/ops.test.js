@@ -305,3 +305,47 @@ t.test('keypair async inherits stdin/stderr while parsing stdout json', async (c
   })
   ct.end()
 })
+
+t.test('status async writes stderr from ops process', async (ct) => {
+  const execFileSync = sinon.stub()
+  const promisifiedExecFile = sinon.stub()
+  const execFile = sinon.stub()
+  execFile[util.promisify.custom] = promisifiedExecFile
+  const spawn = sinon.stub()
+  const stderrWrite = sinon.stub(process.stderr, 'write')
+  ct.teardown(() => stderrWrite.restore())
+
+  promisifiedExecFile
+    .onCall(0).resolves({ stdout: Buffer.from('1.0.0\n') }) // --version npm
+    .onCall(1).resolves({ stdout: Buffer.from('on\n'), stderr: Buffer.from('ops warning\n') })
+
+  const Ops = proxyquire('../../../src/lib/extensions/ops', {
+    child_process: { execFileSync, execFile, spawn }
+  })
+
+  const ops = new Ops()
+  ct.equal(await ops.status(), 'on')
+  ct.equal(stderrWrite.callCount, 1)
+  ct.equal(stderrWrite.firstCall.args[0], 'ops warning\n')
+  ct.end()
+})
+
+t.test('keypair async returns empty object when interactive process exits non-zero', async (ct) => {
+  const execFileSync = sinon.stub()
+  const promisifiedExecFile = sinon.stub()
+  const execFile = sinon.stub()
+  execFile[util.promisify.custom] = promisifiedExecFile
+  const spawn = sinon.stub()
+
+  promisifiedExecFile
+    .onCall(0).resolves({ stdout: Buffer.from('1.0.0\n') }) // --version npm
+  spawn.onCall(0).returns(spawnResult(undefined, 23))
+
+  const Ops = proxyquire('../../../src/lib/extensions/ops', {
+    child_process: { execFileSync, execFile, spawn }
+  })
+
+  const ops = new Ops()
+  ct.same(await ops.keypair(), {})
+  ct.end()
+})
