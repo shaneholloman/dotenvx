@@ -56,6 +56,52 @@ t.test('run', async ct => {
   ct.end()
 })
 
+t.test('run passes spinner pause/resume hooks to Run service', async ct => {
+  const spinner = {
+    stop: sinon.stub(),
+    start: sinon.stub()
+  }
+  let runArgs
+  class RunStub {
+    constructor (...args) {
+      runArgs = args
+    }
+
+    async run () {
+      await runArgs[5].beforeOpsKeypair()
+      await runArgs[5].afterOpsKeypair()
+      return {
+        processedEnvs: [],
+        readableStrings: [],
+        readableFilepaths: [],
+        uniqueInjectedKeys: []
+      }
+    }
+  }
+  class SessionStub {
+    async noOps () {
+      return false
+    }
+  }
+  const runWithStubs = proxyquire('../../../src/cli/actions/run', {
+    './../../lib/helpers/executeCommand': async () => true,
+    './../../lib/services/run': RunStub,
+    '../../lib/helpers/createSpinner': async () => spinner,
+    '../../db/session': SessionStub
+  })
+  const loggerSuccessvStub = sinon.stub(logger, 'successv')
+  const fakeContext = { opts: () => ({}), args: ['echo', ''], envs: [] }
+  sinon.stub(process, 'argv').value(['node', 'dotenvx', 'run', '--', 'echo', ''])
+
+  await runWithStubs.call(fakeContext)
+
+  ct.equal(spinner.stop.callCount, 2)
+  ct.equal(spinner.start.callCount, 1)
+  ct.equal(spinner.start.firstCall.args[0], 'injecting')
+  ct.equal(loggerSuccessvStub.callCount, 1)
+  ct.end()
+})
+
 t.test('run --convention', async ct => {
   const optsStub = sinon.stub().returns({ convention: 'nextjs' })
   const fakeContext = { opts: optsStub, args: ['echo', ''], envs: [] }
