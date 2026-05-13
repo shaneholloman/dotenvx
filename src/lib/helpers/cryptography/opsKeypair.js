@@ -1,7 +1,15 @@
 const Ops = require('../../extensions/ops')
 
-async function opsKeypair (existingPublicKey) {
-  const kp = await new Ops().keypair(existingPublicKey)
+async function opsKeypair (existingPublicKey, options = {}) {
+  if (options.beforeOpsKeypair) await options.beforeOpsKeypair()
+
+  let kp
+  try {
+    kp = await new Ops().keypair(existingPublicKey)
+  } finally {
+    if (options.afterOpsKeypair) await options.afterOpsKeypair()
+  }
+
   const publicKey = kp.public_key
   const privateKey = kp.private_key
 

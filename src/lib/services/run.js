@@ -17,12 +17,14 @@ const {
 } = require('./../helpers/keyResolution')
 
 class Run {
-  constructor (envs = [], overload = false, processEnv = process.env, envKeysFilepath = null, noOps = false) {
+  constructor (envs = [], overload = false, processEnv = process.env, envKeysFilepath = null, noOps = false, options = {}) {
     this.envs = envs
     this.overload = overload
     this.processEnv = processEnv
     this.envKeysFilepath = envKeysFilepath
     this.noOps = noOps
+    this.beforeOpsKeypair = options.beforeOpsKeypair
+    this.afterOpsKeypair = options.afterOpsKeypair
 
     this.processedEnvs = []
     this.readableFilepaths = new Set()
@@ -179,7 +181,12 @@ class Run {
       this.readableFilepaths.add(envFilepath)
 
       const { privateKeyName } = keyNames(filepath)
-      const { privateKeyValue } = await keyValues(filepath, { keysFilepath: this.envKeysFilepath, noOps: this.noOps })
+      const { privateKeyValue } = await keyValues(filepath, {
+        keysFilepath: this.envKeysFilepath,
+        noOps: this.noOps,
+        beforeOpsKeypair: this.beforeOpsKeypair,
+        afterOpsKeypair: this.afterOpsKeypair
+      })
 
       const {
         parsed,
