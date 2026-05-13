@@ -2,6 +2,19 @@ const t = require('tap')
 const sinon = require('sinon')
 const proxyquire = require('proxyquire')
 const util = require('util')
+const { EventEmitter } = require('events')
+
+function spawnResult (stdout, code = 0) {
+  const subprocess = new EventEmitter()
+  subprocess.stdout = new EventEmitter()
+  setImmediate(() => {
+    if (stdout !== undefined) {
+      subprocess.stdout.emit('data', Buffer.from(stdout))
+    }
+    subprocess.emit('close', code)
+  })
+  return subprocess
+}
 
 t.beforeEach(() => {
   process.env.DOTENVX_NO_OPS = 'false'
@@ -39,7 +52,7 @@ t.test('statusSync and keypairSync use npm binary when available', (ct) => {
   ct.end()
 })
 
-t.test('status and keypair are async and use execFile', async (ct) => {
+t.test('status uses execFile and keypair uses interactive spawn', async (ct) => {
   const execFileSync = sinon.stub()
   const promisifiedExecFile = sinon.stub()
   const execFile = sinon.stub()
@@ -49,8 +62,9 @@ t.test('status and keypair are async and use execFile', async (ct) => {
   promisifiedExecFile
     .onCall(0).resolves({ stdout: Buffer.from('1.0.0\n') }) // --version npm
     .onCall(1).resolves({ stdout: Buffer.from('on\n') }) // status npm
-    .onCall(2).resolves({ stdout: Buffer.from('{"public_key":"pub","private_key":"priv"}') }) // keypair npm
-    .onCall(3).resolves({ stdout: Buffer.from('{"public_key":"pub2","private_key":"priv2"}') }) // keypair npm with arg
+  spawn
+    .onCall(0).returns(spawnResult('{"public_key":"pub","private_key":"priv"}'))
+    .onCall(1).returns(spawnResult('{"public_key":"pub2","private_key":"priv2"}'))
 
   const Ops = proxyquire('../../../src/lib/extensions/ops', {
     child_process: { execFileSync, execFile, spawn }
@@ -63,8 +77,12 @@ t.test('status and keypair are async and use execFile', async (ct) => {
 
   ct.same(promisifiedExecFile.getCall(0).args[1], ['--version'])
   ct.same(promisifiedExecFile.getCall(1).args[1], ['status'])
-  ct.same(promisifiedExecFile.getCall(2).args[1], ['keypair'])
-  ct.same(promisifiedExecFile.getCall(3).args[1], ['keypair', 'existing-public-key'])
+  ct.same(spawn.getCall(0).args, [promisifiedExecFile.getCall(0).args[0], ['keypair'], {
+    stdio: ['inherit', 'pipe', 'inherit']
+  }])
+  ct.same(spawn.getCall(1).args, [promisifiedExecFile.getCall(0).args[0], ['keypair', 'existing-public-key'], {
+    stdio: ['inherit', 'pipe', 'inherit']
+  }])
   ct.end()
 })
 
@@ -193,7 +211,7 @@ t.test('keypair/keypairSync return empty object when parsing or exec fails', asy
 
   promisifiedExecFile
     .onCall(0).resolves({ stdout: Buffer.from('1.0.0\n') }) // --version npm
-    .onCall(1).resolves({ stdout: Buffer.from('not-json') }) // keypair output
+  spawn.onCall(0).returns(spawnResult('not-json')) // keypair output
 
   const Ops = proxyquire('../../../src/lib/extensions/ops', {
     child_process: { execFileSync, execFile, spawn }
@@ -265,7 +283,7 @@ t.test('observe returns early when no binary can be resolved', (ct) => {
   ct.end()
 })
 
-t.test('keypair async forwards stderr from dotenvx-ops while parsing stdout json', async (ct) => {
+t.test('keypair async inherits stdin/stderr while parsing stdout json', async (ct) => {
   const execFileSync = sinon.stub()
   const promisifiedExecFile = sinon.stub()
   const execFile = sinon.stub()
@@ -274,12 +292,7 @@ t.test('keypair async forwards stderr from dotenvx-ops while parsing stdout json
 
   promisifiedExecFile
     .onCall(0).resolves({ stdout: Buffer.from('1.0.0\n') }) // --version npm
-    .onCall(1).resolves({
-      stdout: Buffer.from('{"public_key":"pub","private_key":"priv"}'),
-      stderr: Buffer.from('⤴ update available\n')
-    }) // keypair npm
-
-  const stderrWriteStub = sinon.stub(process.stderr, 'write').returns(true)
+  spawn.onCall(0).returns(spawnResult('{"public_key":"pub","private_key":"priv"}'))
 
   const Ops = proxyquire('../../../src/lib/extensions/ops', {
     child_process: { execFileSync, execFile, spawn }
@@ -287,9 +300,52 @@ t.test('keypair async forwards stderr from dotenvx-ops while parsing stdout json
 
   const ops = new Ops()
   ct.same(await ops.keypair(), { public_key: 'pub', private_key: 'priv' })
-  ct.equal(stderrWriteStub.callCount, 1)
-  ct.equal(stderrWriteStub.firstCall.args[0], '⤴ update available\n')
+  ct.same(spawn.firstCall.args[2], {
+    stdio: ['inherit', 'pipe', 'inherit']
+  })
+  ct.end()
+})
 
-  stderrWriteStub.restore()
+t.test('status async writes stderr from ops process', async (ct) => {
+  const execFileSync = sinon.stub()
+  const promisifiedExecFile = sinon.stub()
+  const execFile = sinon.stub()
+  execFile[util.promisify.custom] = promisifiedExecFile
+  const spawn = sinon.stub()
+  const stderrWrite = sinon.stub(process.stderr, 'write')
+  ct.teardown(() => stderrWrite.restore())
+
+  promisifiedExecFile
+    .onCall(0).resolves({ stdout: Buffer.from('1.0.0\n') }) // --version npm
+    .onCall(1).resolves({ stdout: Buffer.from('on\n'), stderr: Buffer.from('ops warning\n') })
+
+  const Ops = proxyquire('../../../src/lib/extensions/ops', {
+    child_process: { execFileSync, execFile, spawn }
+  })
+
+  const ops = new Ops()
+  ct.equal(await ops.status(), 'on')
+  ct.equal(stderrWrite.callCount, 1)
+  ct.equal(stderrWrite.firstCall.args[0], 'ops warning\n')
+  ct.end()
+})
+
+t.test('keypair async returns empty object when interactive process exits non-zero', async (ct) => {
+  const execFileSync = sinon.stub()
+  const promisifiedExecFile = sinon.stub()
+  const execFile = sinon.stub()
+  execFile[util.promisify.custom] = promisifiedExecFile
+  const spawn = sinon.stub()
+
+  promisifiedExecFile
+    .onCall(0).resolves({ stdout: Buffer.from('1.0.0\n') }) // --version npm
+  spawn.onCall(0).returns(spawnResult(undefined, 23))
+
+  const Ops = proxyquire('../../../src/lib/extensions/ops', {
+    child_process: { execFileSync, execFile, spawn }
+  })
+
+  const ops = new Ops()
+  ct.same(await ops.keypair(), {})
   ct.end()
 })
