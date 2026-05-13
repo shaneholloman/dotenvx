@@ -42,7 +42,7 @@ class Ops {
     if (publicKey) args.push(publicKey)
 
     try {
-      return JSON.parse(await this._exec(binary, args))
+      return JSON.parse(await this._execInteractive(binary, args))
     } catch (_e) {
       return {}
     }
@@ -58,7 +58,7 @@ class Ops {
     if (publicKey) args.push(publicKey)
 
     try {
-      return JSON.parse(this._execSync(binary, args))
+      return JSON.parse(this._execInteractiveSync(binary, args))
     } catch (_e) {
       return {}
     }
@@ -102,6 +102,36 @@ class Ops {
     logger.debug(binary)
     logger.debug(args)
     return childProcess.execFileSync(binary, args).toString().trim()
+  }
+
+  _execInteractive (binary, args) {
+    return new Promise((resolve, reject) => {
+      const subprocess = childProcess.spawn(binary, args, {
+        stdio: ['inherit', 'pipe', 'inherit']
+      })
+      let stdout = ''
+
+      subprocess.stdout.on('data', (data) => {
+        stdout += data.toString()
+      })
+      subprocess.on('error', reject)
+      subprocess.on('close', (code) => {
+        if (code !== 0) {
+          reject(new Error(`${binary} ${args.join(' ')} exited with code ${code}`))
+          return
+        }
+
+        resolve(stdout.trim())
+      })
+    })
+  }
+
+  _execInteractiveSync (binary, args) {
+    logger.debug(binary)
+    logger.debug(args)
+    return childProcess.execFileSync(binary, args, {
+      stdio: ['inherit', 'pipe', 'inherit']
+    }).toString().trim()
   }
 
   async _resolveBinary () {
