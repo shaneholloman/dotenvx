@@ -363,6 +363,23 @@ export function ls(
   excludeEnvFile: string | string[]
 ): string[];
 
+export type DoctorFinding = {
+  lang: string;
+  filepath: string;
+  line: number;
+  code: string;
+  msg: string;
+};
+
+/**
+ * Scan code for dotenv loaders that can conflict with dotenvx.
+ *
+ * @param directory - directory to scan
+ */
+export function doctor(
+  directory: string
+): DoctorFinding[];
+
 export type GenExampleOutput = {
   envExampleFile: string;
   envFile: string | string[];

@@ -186,6 +186,14 @@ program.command('ls')
     return require('./actions/ls').apply(this, args)
   })
 
+// dotenvx doctor
+program.command('doctor', { hidden: true })
+  .description('scan for dotenv loaders')
+  .argument('[directory]', 'directory to scan', '.')
+  .action(function (...args) {
+    return require('./actions/doctor').apply(this, args)
+  })
+
 // dotenvx login
 program.command('login')
   .description('log in to unlock ⛨ ARMORED KEYS ✦ BETA')

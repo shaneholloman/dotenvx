@@ -7,6 +7,7 @@ const { getColor, bold } = require('./../shared/colors')
 
 // services
 const Ls = require('./services/ls')
+const Doctor = require('./services/doctor')
 const Run = require('./services/run')
 const Sets = require('./services/sets')
 const Get = require('./services/get')
@@ -298,6 +299,10 @@ const ls = function (directory, envFile, excludeEnvFile) {
   return new Ls(directory, envFile, excludeEnvFile).run()
 }
 
+const doctor = function (directory) {
+  return new Doctor(directory).run()
+}
+
 /** @type {import('./main').genexample} */
 const genexample = function (directory, envFile) {
   return new Genexample(directory, envFile).run()
@@ -326,6 +331,7 @@ module.exports = {
   set,
   get,
   ls,
+  doctor,
   keypair,
   genexample,
   // expose for libs depending on @dotenvx/dotenvx - like dotenvx-ops
