@@ -2,7 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
-[Unreleased](https://github.com/dotenvx/dotenvx/compare/v1.65.2...main)
+[Unreleased](https://github.com/dotenvx/dotenvx/compare/v1.65.3...main)
+
+## [1.65.3](https://github.com/dotenvx/dotenvx/compare/v1.65.2...v1.65.3) (2026-05-13)
+
+### Changed
+
+* Improve spinner message blinking with simpler `--no-spinner` flag passed to ops ([#814](https://github.com/dotenvx/dotenvx/pull/814))
 
 ## [1.65.2](https://github.com/dotenvx/dotenvx/compare/v1.65.1...v1.65.2) (2026-05-13)
 
