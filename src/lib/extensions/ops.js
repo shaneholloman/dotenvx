@@ -43,7 +43,7 @@ class Ops {
     if (publicKey) args.push(publicKey)
 
     try {
-      return JSON.parse(await this._execInteractive(binary, args, options))
+      return JSON.parse(await this._execInteractive(binary, args))
     } catch (_e) {
       return {}
     }
@@ -106,7 +106,7 @@ class Ops {
     return childProcess.execFileSync(binary, args).toString().trim()
   }
 
-  _execInteractive (binary, args, options = {}) {
+  _execInteractive (binary, args) {
     return new Promise((resolve, reject) => {
       const spawnOptions = {
         stdio: ['inherit', 'pipe', 'inherit']
