@@ -73,6 +73,21 @@ t.test('config supports deprecated opsOff option',
     ct.end()
   })
 
+t.test('config supports noSpinner option',
+  ct => {
+    const stub = sinon.stub(Run.prototype, 'runSync')
+    stub.returns({ processedEnvs: [], readableFilepaths: [], uniqueInjectedKeys: [] })
+
+    main.config({ noSpinner: true })
+
+    t.ok(stub.called, 'new Run().runSync() called')
+    t.equal(stub.thisValues[0].noSpinner, true, 'Run was called with noSpinner true')
+
+    stub.restore()
+
+    ct.end()
+  })
+
 t.test('config with convention - calls Run.run with proper envs',
   ct => {
     const stub = sinon.stub(Run.prototype, 'runSync')

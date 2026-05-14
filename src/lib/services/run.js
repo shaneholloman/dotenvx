@@ -23,6 +23,7 @@ class Run {
     this.processEnv = processEnv
     this.envKeysFilepath = envKeysFilepath
     this.noOps = noOps
+    this.noSpinner = options.noSpinner
     this.beforeOpsKeypair = options.beforeOpsKeypair
     this.afterOpsKeypair = options.afterOpsKeypair
 
@@ -136,7 +137,11 @@ class Run {
       this.readableFilepaths.add(envFilepath)
 
       const { privateKeyName } = keyNames(filepath)
-      const { privateKeyValue } = keyValuesSync(filepath, { keysFilepath: this.envKeysFilepath, noOps: this.noOps })
+      const { privateKeyValue } = keyValuesSync(filepath, {
+        keysFilepath: this.envKeysFilepath,
+        noOps: this.noOps,
+        noSpinner: this.noSpinner
+      })
 
       const {
         parsed,

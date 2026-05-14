@@ -85,6 +85,22 @@ t.test('#keyValuesSync loads private key from ops when noOps is false and only p
   ct.end()
 })
 
+t.test('#keyValuesSync forwards noSpinner to ops', async ct => {
+  const opsKeypairSync = sinon.stub().returns({ privateKey: 'from-ops' })
+  const keyValuesWithOpsStub = proxyquire('../../../../src/lib/helpers/keyResolution/keyValuesSync', {
+    '../cryptography/opsKeypairSync': opsKeypairSync
+  })
+
+  process.env.DOTENV_PUBLIC_KEY = '<publicKey>'
+
+  const result = await keyValuesWithOpsStub('.env', { noOps: false, noSpinner: true })
+
+  ct.same(result, { publicKeyValue: '<publicKey>', privateKeyValue: 'from-ops' })
+  ct.equal(opsKeypairSync.callCount, 1)
+  ct.same(opsKeypairSync.firstCall.args, ['<publicKey>', { noSpinner: true }])
+  ct.end()
+})
+
 t.test('#keyValuesSync does not load private key from ops when noOps is true', async ct => {
   const opsKeypairSync = sinon.stub().returns({ privateKey: 'from-ops' })
   const keyValuesWithOpsStub = proxyquire('../../../../src/lib/helpers/keyResolution/keyValuesSync', {

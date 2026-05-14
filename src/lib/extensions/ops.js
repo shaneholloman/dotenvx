@@ -32,29 +32,31 @@ class Ops {
     }
   }
 
-  async keypair (publicKey) {
+  async keypair (publicKey, options = {}) {
     if (this._isForcedOff()) return {}
 
     const binary = await this._resolveBinary()
     if (!binary) return {}
 
     const args = ['keypair']
+    if (options.noSpinner) args.push('--no-spinner')
     if (publicKey) args.push(publicKey)
 
     try {
-      return JSON.parse(await this._execInteractive(binary, args))
+      return JSON.parse(await this._execInteractive(binary, args, options))
     } catch (_e) {
       return {}
     }
   }
 
-  keypairSync (publicKey) {
+  keypairSync (publicKey, options = {}) {
     if (this._isForcedOff()) return {}
 
     const binary = this._resolveBinarySync()
     if (!binary) return {}
 
     const args = ['keypair']
+    if (options.noSpinner) args.push('--no-spinner')
     if (publicKey) args.push(publicKey)
 
     try {
@@ -104,11 +106,12 @@ class Ops {
     return childProcess.execFileSync(binary, args).toString().trim()
   }
 
-  _execInteractive (binary, args) {
+  _execInteractive (binary, args, options = {}) {
     return new Promise((resolve, reject) => {
-      const subprocess = childProcess.spawn(binary, args, {
+      const spawnOptions = {
         stdio: ['inherit', 'pipe', 'inherit']
-      })
+      }
+      const subprocess = childProcess.spawn(binary, args, spawnOptions)
       let stdout = ''
 
       subprocess.stdout.on('data', (data) => {

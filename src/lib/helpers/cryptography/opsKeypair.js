@@ -5,7 +5,11 @@ async function opsKeypair (existingPublicKey, options = {}) {
 
   let kp
   try {
-    kp = await new Ops().keypair(existingPublicKey)
+    if (options.beforeOpsKeypair || options.afterOpsKeypair) {
+      kp = await new Ops().keypair(existingPublicKey, { noSpinner: true })
+    } else {
+      kp = await new Ops().keypair(existingPublicKey)
+    }
   } finally {
     if (options.afterOpsKeypair) await options.afterOpsKeypair()
   }
