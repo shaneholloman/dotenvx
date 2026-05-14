@@ -70,6 +70,7 @@ t.test('opsKeypair brackets Ops keypair with spinner hooks', async (ct) => {
   ct.equal(out.publicKey, 'ops_pub_abc')
   ct.equal(beforeOpsKeypair.callCount, 1)
   ct.equal(keypair.callCount, 1)
+  ct.same(keypair.firstCall.args[1], { noSpinner: true })
   ct.equal(afterOpsKeypair.callCount, 1)
   ct.ok(beforeOpsKeypair.calledBefore(keypair))
   ct.ok(afterOpsKeypair.calledAfter(keypair))

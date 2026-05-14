@@ -146,6 +146,14 @@ export interface DotenvConfigOptions {
 
   quiet?: boolean;
 
+  /**
+   * Disable spinner output from child Dotenvx Ops commands.
+   *
+   * @default false
+   * @example require('@dotenvx/dotenvx').config({ noSpinner: true })
+   */
+  noSpinner?: boolean;
+
   logLevel?:
     | 'error'
     | 'warn'

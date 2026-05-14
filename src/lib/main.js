@@ -59,7 +59,9 @@ const config = function (options = {}) {
       processedEnvs,
       readableFilepaths,
       uniqueInjectedKeys
-    } = new Run(envs, overload, processEnv, envKeysFile, noOps).runSync()
+    } = new Run(envs, overload, processEnv, envKeysFile, noOps, {
+      noSpinner: options.noSpinner
+    }).runSync()
 
     let lastError
     /** @type {Record<string, string>} */

@@ -52,6 +52,26 @@ t.test('statusSync and keypairSync use npm binary when available', (ct) => {
   ct.end()
 })
 
+t.test('keypairSync can disable child spinner', (ct) => {
+  const execFileSync = sinon.stub()
+  const execFile = sinon.stub()
+  execFile[util.promisify.custom] = sinon.stub()
+  const spawn = sinon.stub()
+
+  execFileSync
+    .onCall(0).returns(Buffer.from('1.0.0\n')) // --version npm
+    .onCall(1).returns(Buffer.from('{"public_key":"pub","private_key":"priv"}'))
+
+  const Ops = proxyquire('../../../src/lib/extensions/ops', {
+    child_process: { execFileSync, execFile, spawn }
+  })
+
+  const ops = new Ops()
+  ct.same(ops.keypairSync('existing-public-key', { noSpinner: true }), { public_key: 'pub', private_key: 'priv' })
+  ct.same(execFileSync.getCall(1).args[1], ['keypair', '--no-spinner', 'existing-public-key'])
+  ct.end()
+})
+
 t.test('status uses execFile and keypair uses interactive spawn', async (ct) => {
   const execFileSync = sinon.stub()
   const promisifiedExecFile = sinon.stub()
@@ -303,6 +323,29 @@ t.test('keypair async inherits stdin/stderr while parsing stdout json', async (c
   ct.same(spawn.firstCall.args[2], {
     stdio: ['inherit', 'pipe', 'inherit']
   })
+  ct.end()
+})
+
+t.test('keypair async can disable child spinner', async (ct) => {
+  const execFileSync = sinon.stub()
+  const promisifiedExecFile = sinon.stub()
+  const execFile = sinon.stub()
+  execFile[util.promisify.custom] = promisifiedExecFile
+  const spawn = sinon.stub()
+
+  promisifiedExecFile
+    .onCall(0).resolves({ stdout: Buffer.from('1.0.0\n') }) // --version npm
+  spawn.onCall(0).returns(spawnResult('{"public_key":"pub","private_key":"priv"}'))
+
+  const Ops = proxyquire('../../../src/lib/extensions/ops', {
+    child_process: { execFileSync, execFile, spawn }
+  })
+
+  const ops = new Ops()
+  ct.same(await ops.keypair('existing-public-key', { noSpinner: true }), { public_key: 'pub', private_key: 'priv' })
+  ct.same(spawn.firstCall.args[1], ['keypair', '--no-spinner', 'existing-public-key'])
+  ct.same(spawn.firstCall.args[2].stdio, ['inherit', 'pipe', 'inherit'])
+  ct.notOk(spawn.firstCall.args[2].env)
   ct.end()
 })
 

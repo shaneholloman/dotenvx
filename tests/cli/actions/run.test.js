@@ -56,7 +56,7 @@ t.test('run', async ct => {
   ct.end()
 })
 
-t.test('run passes spinner pause/resume hooks to Run service', async ct => {
+t.test('run passes spinner text handoff hooks to Run service', async ct => {
   const spinner = {
     stop: sinon.stub(),
     start: sinon.stub()
@@ -95,9 +95,10 @@ t.test('run passes spinner pause/resume hooks to Run service', async ct => {
 
   await runWithStubs.call(fakeContext)
 
-  ct.equal(spinner.stop.callCount, 2)
-  ct.equal(spinner.start.callCount, 1)
-  ct.equal(spinner.start.firstCall.args[0], 'injecting')
+  ct.equal(spinner.stop.callCount, 1)
+  ct.equal(spinner.start.callCount, 2)
+  ct.equal(spinner.start.firstCall.args[0], 'retrieving')
+  ct.equal(spinner.start.secondCall.args[0], 'injecting')
   ct.equal(loggerSuccessvStub.callCount, 1)
   ct.end()
 })

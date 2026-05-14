@@ -55,7 +55,7 @@ async function run () {
       uniqueInjectedKeys
     } = await new Run(envs, options.overload, process.env, options.envKeysFile, noOps, {
       beforeOpsKeypair: () => {
-        if (spinner) spinner.stop()
+        if (spinner) spinner.start('retrieving')
       },
       afterOpsKeypair: () => {
         if (spinner) spinner.start('injecting')

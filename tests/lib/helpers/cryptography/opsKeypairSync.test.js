@@ -48,3 +48,25 @@ t.test('opsKeypairSync forwards provided public key to Ops keypair', async (ct) 
   ct.equal(keypairSync.firstCall.args[0], 'existing_pub')
   ct.end()
 })
+
+t.test('opsKeypairSync forwards options to Ops keypair', async (ct) => {
+  const keypairSync = sinon.stub().returns({
+    public_key: 'ops_pub_abc',
+    private_key: 'ops_priv_abc'
+  })
+
+  function OpsMock () {
+    this.keypairSync = keypairSync
+  }
+
+  const opsKeypairSync = proxyquire('../../../../src/lib/helpers/cryptography/opsKeypairSync', {
+    './../../extensions/ops': OpsMock
+  })
+
+  const out = opsKeypairSync('existing_pub', { noSpinner: true })
+
+  ct.equal(out.publicKey, 'ops_pub_abc')
+  ct.equal(keypairSync.callCount, 1)
+  ct.same(keypairSync.firstCall.args, ['existing_pub', { noSpinner: true }])
+  ct.end()
+})
