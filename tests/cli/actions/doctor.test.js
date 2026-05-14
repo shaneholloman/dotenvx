@@ -24,6 +24,20 @@ t.test('doctor calls main.doctor and prints findings', ct => {
   ct.end()
 })
 
+t.test('doctor pluralizes loader count', ct => {
+  sinon.stub(main, 'doctor').returns([
+    { lang: 'Python', filepath: 'app.py', line: 2, code: 'load_dotenv()', msg: 'found python-dotenv load call' },
+    { lang: 'Node', filepath: 'index.js', line: 1, code: "require('dotenv').config()", msg: 'found dotenv config require call' }
+  ])
+  const warnStub = sinon.stub(logger, 'warn')
+  sinon.stub(logger, 'info')
+
+  doctor('.')
+
+  ct.ok(warnStub.calledWith('found 2 possible dotenv loaders'), 'logger.warn count')
+  ct.end()
+})
+
 t.test('doctor prints clean message when no findings are found', ct => {
   sinon.stub(main, 'doctor').returns([])
   const infoStub = sinon.stub(logger, 'info')

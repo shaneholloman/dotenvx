@@ -11,6 +11,7 @@ const Run = require('../../src/lib/services/run')
 const Sets = require('../../src/lib/services/sets')
 const Get = require('../../src/lib/services/get')
 const Keypair = require('../../src/lib/services/keypair')
+const Doctor = require('../../src/lib/services/doctor')
 const Genexample = require('../../src/lib/services/genexample')
 const Errors = require('../../src/lib/helpers/errors')
 
@@ -472,6 +473,20 @@ t.test('ls calls Ls.run',
     main.ls()
 
     t.ok(stub.called, 'new Ls().run() called')
+
+    stub.restore()
+
+    ct.end()
+  })
+
+t.test('doctor calls Doctor.run',
+  ct => {
+    const stub = sinon.stub(Doctor.prototype, 'run')
+    stub.returns([])
+
+    main.doctor()
+
+    t.ok(stub.called, 'new Doctor().run() called')
 
     stub.restore()
 
