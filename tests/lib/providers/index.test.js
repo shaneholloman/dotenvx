@@ -33,17 +33,32 @@ t.test('providers returns explicit provider', async ct => {
   ct.end()
 })
 
-t.test('providers returns null when disabled', async ct => {
+t.test('providers returns explicit null provider', async ct => {
   const session = {
     noArmor: sinon.stub().rejects(new Error('should not check session')),
     noArmorSync: sinon.stub().throws(new Error('should not check session'))
   }
   const providers = providersWithSession(session)
 
-  ct.equal(await providers({ noArmor: true }), null)
   ct.equal(await providers({ provider: null }), null)
-  ct.equal(providers.sync({ noArmor: true }), null)
   ct.equal(providers.sync({ provider: null }), null)
+  ct.end()
+})
+
+t.test('providers returns keychain provider when armor is disabled', async ct => {
+  const keychain = keychainStub()
+  const session = {
+    noArmor: sinon.stub().rejects(new Error('should not check session')),
+    noArmorSync: sinon.stub().throws(new Error('should not check session'))
+  }
+  const providers = providersWithSession(session, {
+    './keychain/index': keychain
+  })
+
+  ct.equal(await providers({ noArmor: true }), keychain)
+  ct.equal(await providers({ armor: false }), keychain)
+  ct.equal(providers.sync({ noArmor: true }), keychain)
+  ct.equal(providers.sync({ armor: false }), keychain)
   ct.end()
 })
 

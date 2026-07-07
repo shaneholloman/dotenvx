@@ -20,7 +20,7 @@ t.test('keychain provider finds private key by public key', ct => {
   ct.same(execFileSync.firstCall.args, [
     '/usr/bin/security',
     ['find-generic-password', '-s', 'dotenvx', '-a', 'public-key', '-w'],
-    { encoding: 'utf8' }
+    { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }
   ])
   ct.end()
 })

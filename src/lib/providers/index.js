@@ -48,7 +48,7 @@ async function providers (options = {}) {
   }
 
   if (options.noArmor || options.armor === false) {
-    return null
+    return keychainProvider
   }
 
   const sesh = new Session()
@@ -67,7 +67,7 @@ providers.sync = function providersSync (options = {}) {
   }
 
   if (options.noArmor || options.armor === false) {
-    return null
+    return keychainProvider
   }
 
   const sesh = new Session()
