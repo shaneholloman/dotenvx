@@ -47,26 +47,37 @@ function useKeychain (options) {
   return options.noKeychain !== true && options.keychain !== false
 }
 
+function useArmor (options, noArmor) {
+  return options.noArmor !== true && options.armor !== false && !noArmor
+}
+
+function providerFrom (providerFns, compose) {
+  if (providerFns.length === 0) return null
+  if (providerFns.length === 1) return providerFns[0]
+
+  return compose(providerFns)
+}
+
 async function providers (options = {}) {
   if (Object.prototype.hasOwnProperty.call(options, 'provider')) {
     return options.provider
   }
 
-  if (options.noArmor || options.armor === false) {
-    return useKeychain(options) ? keychainProvider : null
+  const providerFns = []
+
+  if (useKeychain(options)) {
+    providerFns.push(keychainProvider)
   }
 
-  const sesh = new Session()
-  const noArmor = !options.token && await sesh.noArmor()
-  if (noArmor) return useKeychain(options) ? keychainProvider : null
+  if (options.noArmor !== true && options.armor !== false) {
+    const sesh = new Session()
+    const noArmor = !options.token && await sesh.noArmor()
+    if (useArmor(options, noArmor)) {
+      providerFns.push(armorProviderForOptions(options))
+    }
+  }
 
-  const providerFns = [
-    armorProviderForOptions(options)
-  ]
-
-  if (useKeychain(options)) providerFns.unshift(keychainProvider)
-
-  return composeProviders(providerFns)
+  return providerFrom(providerFns, composeProviders)
 }
 
 providers.sync = function providersSync (options = {}) {
@@ -74,21 +85,21 @@ providers.sync = function providersSync (options = {}) {
     return options.provider
   }
 
-  if (options.noArmor || options.armor === false) {
-    return useKeychain(options) ? keychainProvider : null
+  const providerFns = []
+
+  if (useKeychain(options)) {
+    providerFns.push(keychainProvider)
   }
 
-  const sesh = new Session()
-  const noArmor = !options.token && sesh.noArmorSync()
-  if (noArmor) return useKeychain(options) ? keychainProvider : null
+  if (options.noArmor !== true && options.armor !== false) {
+    const sesh = new Session()
+    const noArmor = !options.token && sesh.noArmorSync()
+    if (useArmor(options, noArmor)) {
+      providerFns.push(syncArmorProvider)
+    }
+  }
 
-  const providerFns = [
-    syncArmorProvider
-  ]
-
-  if (useKeychain(options)) providerFns.unshift(keychainProvider)
-
-  return composeProvidersSync(providerFns)
+  return providerFrom(providerFns, composeProvidersSync)
 }
 
 module.exports = providers
