@@ -2,6 +2,7 @@ const Session = require('./../../db/session')
 
 const armorProvider = require('./armor/index')
 const keychainProvider = require('./keychain/index')
+
 function syncArmorProvider (publicKeyHex) {
   const { createSyncFn } = require('synckit')
   const runProviderSync = createSyncFn(require.resolve('./worker.js'))
