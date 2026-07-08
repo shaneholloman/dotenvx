@@ -2323,6 +2323,35 @@ CMD ["/usr/local/bin/dotenvx", "run", "--", "node", "apps/backend/index.js"]
 ```
 
 </details>
+<details><summary>`lock`</summary><br>
+
+Lock private keys with a local passphrase to keep them protected inside `.env.keys`.
+
+</details>
+<details><summary>`lock up`</summary><br>
+
+Lock a private key in `.env.keys` with a local passphrase.
+
+```sh
+$ dotenvx lock up
+```
+
+Specify files with `-f` and `-fk`.
+
+```sh
+$ dotenvx lock up -f .env.production -fk .env.keys
+```
+
+</details>
+<details><summary>`lock down`</summary><br>
+
+Unlock a private key in `.env.keys` with its local passphrase.
+
+```sh
+$ dotenvx lock down
+```
+
+</details>
 <details><summary>`keychain`</summary><br>
 
 Store private keys in macOS Keychain to keep them out of `.env.keys`.
@@ -2488,6 +2517,7 @@ Commands:
                      prevent including .env files in docker
  
 Professional Security: 
+  lock                     ⊡ lock private keys with a local passphrase
   keychain                 ⌥ move private keys into local macOS Keychain
   armor                    ⛨ move private keys into Dotenvx Armor [www.dotenvx.com/armor]
 ```
