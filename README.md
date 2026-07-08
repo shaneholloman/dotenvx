@@ -2174,6 +2174,61 @@ $ dotenvx ls -ef '**/.env.prod*'
 ```
 
 </details>
+<details><summary>`genexample`</summary><br>
+
+In one command, generate a `.env.example` file from your current `.env` file contents.
+
+```sh
+$ echo "HELLO=Dotenvx" > .env
+
+$ dotenvx genexample
+▣ generated (.env.example)
+```
+
+```ini
+# .env.example
+HELLO=""
+```
+
+</details>
+<details><summary>`genexample -f`</summary><br>
+
+Pass multiple `.env` files to generate your `.env.example` file from the combination of their contents.
+
+```sh
+$ echo "HELLO=Dotenvx" > .env
+$ echo "DB_HOST=example.com" > .env.production
+
+$ dotenvx genexample -f .env -f .env.production
+▣ generated (.env.example)
+```
+
+```ini
+# .env.example
+HELLO=""
+DB_HOST=""
+```
+
+</details>
+<details><summary>`genexample directory`</summary><br>
+
+Generate a `.env.example` file inside the specified directory. Useful for monorepos.
+
+```sh
+$ echo "HELLO=Dotenvx" > .env
+$ mkdir -p apps/backend
+$ echo "HELLO=Backend" > apps/backend/.env
+
+$ dotenvx genexample apps/backend
+▣ generated (.env.example)
+```
+
+```ini
+# apps/backend/.env.example
+HELLO=""
+```
+
+</details>
 <details><summary>`gitignore`</summary><br>
 
 Gitignore your `.env` files.
@@ -2406,6 +2461,8 @@ Commands:
   decrypt            decrypt .env file(s)
   keypair [KEY]      print public/private keys for .env file(s)
   ls [directory]     print all .env files in a tree structure
+  genexample [directory]
+                     generate .env.example
   gitignore          append to .gitignore
   precommit [directory]
                      prevent committing .env files to code
@@ -2467,61 +2524,6 @@ X.X.X
 
 Additional workflow helpers.
 
-<details><summary>`ext genexample`</summary><br>
-
-In one command, generate a `.env.example` file from your current `.env` file contents.
-
-```sh
-$ echo "HELLO=Dotenvx" > .env
-
-$ dotenvx ext genexample
-▣ generated (.env.example)
-```
-
-```ini
-# .env.example
-HELLO=""
-```
-
-</details>
-<details><summary>`ext genexample -f`</summary><br>
-
-Pass multiple `.env` files to generate your `.env.example` file from the combination of their contents.
-
-```sh
-$ echo "HELLO=Dotenvx" > .env
-$ echo "DB_HOST=example.com" > .env.production
-
-$ dotenvx ext genexample -f .env -f .env.production
-▣ generated (.env.example)
-```
-
-```ini
-# .env.example
-HELLO=""
-DB_HOST=""
-```
-
-</details>
-<details><summary>`ext genexample directory`</summary><br>
-
-Generate a `.env.example` file inside the specified directory. Useful for monorepos.
-
-```sh
-$ echo "HELLO=Dotenvx" > .env
-$ mkdir -p apps/backend
-$ echo "HELLO=Backend" > apps/backend/.env
-
-$ dotenvx ext genexample apps/backend
-▣ generated (.env.example)
-```
-
-```ini
-# apps/backend/.env.example
-HELLO=""
-```
-
-</details>
 <details><summary>`ext scan`</summary><br>
 
 Scan for leaked secrets.

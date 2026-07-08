@@ -59,6 +59,19 @@ t.test('ext vault', ct => {
   ct.end()
 })
 
+t.test('genexample works as a direct command', ct => {
+  const tempDir = fs.mkdtempSync(path.join(osTempDir, 'dotenvx-genexample-'))
+  fs.writeFileSync(path.join(tempDir, '.env'), 'HELLO=Dotenvx\n')
+
+  const result = runCommand(`${dotenvx} genexample`, tempDir)
+
+  ct.equal(result.exitCode, 0, 'genexample exits successfully')
+  ct.match(result.output, /generated \(\.env\.example\)/, 'generates .env.example')
+  ct.equal(fs.readFileSync(path.join(tempDir, '.env.example'), 'utf8'), '# .env.example - generated with dotenvx\n\nHELLO=\n')
+
+  ct.end()
+})
+
 t.test('precommit forwards a string directory to action', ct => {
   const tempDir = fs.mkdtempSync(path.join(osTempDir, 'dotenvx-ext-precommit-'))
   fs.writeFileSync(path.join(tempDir, '.gitignore'), '')
