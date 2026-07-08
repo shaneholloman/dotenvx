@@ -4,6 +4,8 @@ const SECURITY_BIN = '/usr/bin/security'
 const SERVICE = 'dotenvx'
 
 function index (publicKeyHex) {
+  if (process.platform !== 'darwin') return {}
+
   try {
     const stdout = execFileSync(SECURITY_BIN, ['find-generic-password', '-s', SERVICE, '-a', publicKeyHex, '-w'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] })
     const privateKeyHex = stdout.trim()
