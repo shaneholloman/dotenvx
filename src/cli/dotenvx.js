@@ -186,6 +186,15 @@ program.command('ls')
     return require('./actions/ls').apply(this, args)
   })
 
+// dotenvx genexample
+program.command('genexample')
+  .description('generate .env.example')
+  .argument('[directory]', 'directory to generate from', '.')
+  .option('-f, --env-file <paths...>', 'path(s) to your env file(s)', '.env')
+  .action(function (...args) {
+    return require('./actions/ext/genexample').apply(this, args)
+  })
+
 // dotenvx gitignore
 program.command('gitignore')
   .description('append to .gitignore')
