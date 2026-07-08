@@ -2920,6 +2920,7 @@ This is known as *Decryption at Access* and is written about in [the whitepaper]
   * [GitHub Actions](https://dotenvx.com/docs/cis/github-actions)
 * [Password Managers](https://dotenvx.com/docs#password-managers)
   * [1Password](https://dotenvx.com/docs/guides/1password)
+  * [Bitwarden](https://dotenvx.com/docs/guides/bitwarden)
 * [Background Jobs](https://dotenvx.com/docs#background-jobs)
   * [Trigger.dev](https://dotenvx.com/docs/background-jobs/triggerdotdev)
 * [Package Managers](https://dotenvx.com/docs#package-managers)
