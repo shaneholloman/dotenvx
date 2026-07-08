@@ -2178,21 +2178,15 @@ $ dotenvx ls -ef '**/.env.prod*'
 
 Move private keys into macOS Keychain so `.env.keys` does not have to keep the private key on disk.
 
+Currently supported on macOS.
+
+</details>
+<details><summary>`keychain up`</summary><br>
+
+Move a private key from `.env.keys` into macOS Keychain.
+
 ```sh
 $ dotenvx keychain up
-```
-
-Use `down` to move the private key back into `.env.keys`.
-
-```sh
-$ dotenvx keychain down
-```
-
-Use `push` and `pull` when you want to copy the key without removing it from the source.
-
-```sh
-$ dotenvx keychain push
-$ dotenvx keychain pull
 ```
 
 Specify files with `-f` and `-fk`.
@@ -2201,42 +2195,94 @@ Specify files with `-f` and `-fk`.
 $ dotenvx keychain up -f .env.production -fk .env.keys
 ```
 
-Currently supported on macOS.
+</details>
+<details><summary>`keychain down`</summary><br>
+
+Move a private key from macOS Keychain back into `.env.keys`.
+
+```sh
+$ dotenvx keychain down
+```
+
+</details>
+<details><summary>`keychain push`</summary><br>
+
+Copy a private key from `.env.keys` into macOS Keychain.
+
+```sh
+$ dotenvx keychain push
+```
+
+</details>
+<details><summary>`keychain pull`</summary><br>
+
+Copy a private key from macOS Keychain into `.env.keys`.
+
+```sh
+$ dotenvx keychain pull
+```
 
 </details>
 <details><summary>`armor`</summary><br>
 
 Move private keys into [Dotenvx Armor ⛨](https://dotenvx.com/armor) for off-device storage, sharing with your team, and audited access.
 
+</details>
+<details><summary>`armor up`</summary><br>
+
+Move a private key from `.env.keys` into Dotenvx Armor.
+
 ```sh
 $ dotenvx login
 $ dotenvx armor up
 ```
 
-Use `down` to move the private key back into `.env.keys`.
+Specify environment and team.
+
+```sh
+$ dotenvx armor up -f .env.production --team acme
+```
+
+</details>
+<details><summary>`armor down`</summary><br>
+
+Move a private key from Dotenvx Armor back into `.env.keys`.
 
 ```sh
 $ dotenvx armor down
 ```
 
-Use `push` and `pull` when you want to copy the key without removing it from the source.
+</details>
+<details><summary>`armor push`</summary><br>
+
+Copy a private key from `.env.keys` into Dotenvx Armor.
 
 ```sh
 $ dotenvx armor push
+```
+
+</details>
+<details><summary>`armor pull`</summary><br>
+
+Copy a private key from Dotenvx Armor into `.env.keys`.
+
+```sh
 $ dotenvx armor pull
 ```
 
-Move an armored key to another team with `move`.
+Use a token when running non-interactively.
+
+```sh
+$ dotenvx armor pull -f .env.production --token "$DOTENVX_ARMOR_TOKEN"
+```
+
+</details>
+<details><summary>`armor move`</summary><br>
+
+Move an armored key to another team.
 
 ```sh
 $ dotenvx armor move --team acme
-```
-
-Armor commands accept `-f`, `--token`, and `--team` where supported.
-
-```sh
-$ dotenvx armor up -f .env.production --team acme
-$ dotenvx armor pull -f .env.production --token "$DOTENVX_ARMOR_TOKEN"
 ```
 
 </details>
