@@ -122,7 +122,7 @@ Hello Dotenvx # with dotenvx
 > :-D
 ```
 
-see [extended quickstart guide](https://dotenvx.com/docs/quickstart)
+see [quickstart guides](https://dotenvx.com/docs/quickstart)
 
 More examples
 
