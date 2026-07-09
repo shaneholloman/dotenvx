@@ -232,7 +232,7 @@ const set = async function (key, value, options = {}) {
   const noKeychain = resolveNoKeychain(options)
 
   const {
-    keysSrc,
+    keysSrcEntries,
     processedEnvs,
     changedFilepaths,
     unchangedFilepaths
@@ -247,8 +247,10 @@ const set = async function (key, value, options = {}) {
     encrypt
   })
 
-  if (keysSrc) {
-    fsx.writeFileXSync(envKeysFilepath || '.env.keys', keysSrc)
+  for (const [filepath, keysSrc] of Object.entries(keysSrcEntries || {})) {
+    if (keysSrc) {
+      fsx.writeFileXSync(filepath, keysSrc)
+    }
   }
 
   let withEncryption = ''

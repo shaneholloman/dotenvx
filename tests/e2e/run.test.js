@@ -115,6 +115,21 @@ Hello local`)) // --debug
   ct.end()
 })
 
+t.test('#run - multiple encrypted .env files with multiple env keys files', ct => {
+  execShell(`
+    echo "HELLO=local" > .env.local
+    echo "HI=production" > .env.production
+    echo "console.log(process.env.HELLO + ' ' + process.env.HI)" > index.js
+  `)
+
+  execShell(`${dotenvx} encrypt -f .env.local -fk .env.local.keys -f .env.production -fk .env.production.keys`)
+
+  const command = `${node} index.js`
+  ct.equal(execShell(`${dotenvx} run -f .env.local -fk .env.production.keys -f .env.production -fk .env.local.keys -- ${command}`).stdout, '⟐ injected env (4) from .env.local, .env.production\nlocal production')
+
+  ct.end()
+})
+
 t.test('#run - multiple .env files --overload', ct => {
   execShell(`
     echo "HELLO=local" > .env.local

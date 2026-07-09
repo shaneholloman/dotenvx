@@ -69,6 +69,23 @@ t.test('#encrypt', ct => {
   ct.end()
 })
 
+t.test('#encrypt - multiple env keys files', ct => {
+  execShell(`
+    echo "HELLO=World" > .env.local
+    echo "HI=there" > .env.production
+  `)
+
+  const output = execShell(`${dotenvx} encrypt -f .env.local -fk .env.local.keys -f .env.production -fk .env.production.keys`)
+
+  ct.equal(output, '◈ encrypted (.env.local,.env.production)')
+  ct.ok(fs.existsSync(path.join(tempDir, '.env.local.keys')), 'writes first env keys file')
+  ct.ok(fs.existsSync(path.join(tempDir, '.env.production.keys')), 'writes second env keys file')
+  ct.equal(execShell(`${dotenvx} get HELLO -f .env.local -fk .env.production.keys -f .env.production -fk .env.local.keys`), 'World')
+  ct.equal(execShell(`${dotenvx} get HI -f .env.local -fk .env.production.keys -f .env.production -fk .env.local.keys`), 'there')
+
+  ct.end()
+})
+
 t.test('#encrypt -k', ct => {
   ct.plan(7)
 

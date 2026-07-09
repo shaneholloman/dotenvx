@@ -9,6 +9,14 @@ const Errors = require('../../lib/helpers/errors')
 const prompts = require('../../lib/helpers/prompts')
 const Session = require('../../db/session')
 
+async function writeKeysSrcEntries (keysSrcEntries) {
+  for (const [filepath, keysSrc] of Object.entries(keysSrcEntries || {})) {
+    if (keysSrc) {
+      await fsx.writeFileX(filepath, keysSrc)
+    }
+  }
+}
+
 async function set (key, value) {
   const options = this.opts()
 
@@ -63,11 +71,9 @@ async function set (key, value) {
   let errorCount = 0
 
   try {
-    const { keysSrc, processedEnvs, changedFilepaths, unchangedFilepaths } = await setTransform({ envs, key, value, fk, noArmor, noCreate, encrypt, noKeychain })
+    const { keysSrcEntries, processedEnvs, changedFilepaths, unchangedFilepaths } = await setTransform({ envs, key, value, fk, noArmor, noCreate, encrypt, noKeychain })
 
-    if (keysSrc) {
-      await fsx.writeFileX(fk, keysSrc)
-    }
+    await writeKeysSrcEntries(keysSrcEntries)
 
     let withEncryption = ''
     if (encrypt) {

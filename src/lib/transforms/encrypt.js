@@ -34,20 +34,29 @@ async function encryptTransform (options = {}) {
   const envs = options.envs || []
   const ik = options.ik
   const ek = options.ek
-  const fk = options.fk || '.env.keys'
+  const fks = options.fk || '.env.keys'
   let noArmor = options.noArmor // key storage selector below
   const noCreate = options.noCreate
 
   const processedEnvs = []
   const changedFilepaths = []
   const unchangedFilepaths = []
+  const keysSrcEntries = {}
 
-  // set up keysSrc
-  let keysSrc
-  if (await fsx.exists(fk)) {
+  async function loadKeysSrc (filepath) {
+    if (Object.prototype.hasOwnProperty.call(keysSrcEntries, filepath)) {
+      return keysSrcEntries[filepath]
+    }
+
+    let keysSrc
+    if (!await fsx.exists(filepath)) {
+      keysSrcEntries[filepath] = keysSrc
+      return keysSrc
+    }
+
     try {
-      const encoding = await detectEncoding(fk)
-      keysSrc = await fsx.readFileX(fk, { encoding })
+      const encoding = await detectEncoding(filepath)
+      keysSrc = await fsx.readFileX(filepath, { encoding })
     } catch (err) {
       if (err.code === 'EACCES' || err.code === 'EPERM') {
         // do nothing (scenario: chmod a-r .env.keys)
@@ -55,8 +64,12 @@ async function encryptTransform (options = {}) {
         throw err
       }
     }
+
+    keysSrcEntries[filepath] = keysSrc
+    return keysSrc
   }
 
+  let envFileIndex = 0
   for (const env of determine(envs, process.env)) {
     if (env.type !== TYPE_ENV_FILE) {
       continue
@@ -64,9 +77,12 @@ async function encryptTransform (options = {}) {
 
     const envFilepath = env.envFilepath || env.value
     const filepath = env.filepath || path.resolve(envFilepath)
+    const fk = Array.isArray(fks) ? fks[envFileIndex] || '.env.keys' : fks
+    envFileIndex += 1
     const row = { keys: [], type: TYPE_ENV_FILE, filepath, envFilepath, changed: false }
 
     try {
+      let keysSrc = await loadKeysSrc(fk)
       const fileExists = await fsx.exists(filepath)
       if (!fileExists && !noCreate) {
         row.envSrc = SAMPLE_ENV_KIT
@@ -101,6 +117,7 @@ async function encryptTransform (options = {}) {
         if (noArmor) {
           const mutated = mutateKeysSrc({ keysSrc, privateKeyName, privateKeyValue: privateKey, comment })
           keysSrc = mutated.keysSrc
+          keysSrcEntries[fk] = keysSrc
         } else {
           const sesh = new Session()
           const hostname = sesh.hostname()
@@ -176,7 +193,7 @@ async function encryptTransform (options = {}) {
   }
 
   return {
-    keysSrc,
+    keysSrcEntries,
     processedEnvs,
     changedFilepaths,
     unchangedFilepaths

@@ -21,6 +21,13 @@ function collectEnvs (type) {
   }
 }
 
+function collectEnvKeys (value, previous) {
+  if (previous === undefined) return value
+  if (Array.isArray(previous)) return previous.concat([value])
+
+  return [previous, value]
+}
+
 // global log levels
 program
   .usage('run -- yourcommand')
@@ -56,7 +63,7 @@ program.command('run')
   .addHelpText('after', examples.run)
   .option('-e, --env <strings...>', 'environment variable(s) set as string (example: "HELLO=World")', collectEnvs('env'), [])
   .option('-f, --env-file <path>', 'path(s) to your env file(s)', collectEnvs('envFile'), [])
-  .option('-fk, --env-keys-file <path>', 'path to your .env.keys file (default: same path as your env file)')
+  .option('-fk, --env-keys-file <path>', 'path(s) to your .env.keys file(s) (default: same path as your env file)', collectEnvKeys)
   .option('-o, --overload', 'override existing env variables (by default, existing env vars take precedence over .env files)')
   .option('--strict', 'process.exit(1) on any errors', false)
   .option('--convention <name>', 'load a .env convention (available conventions: [\'nextjs\', \'flow\'])')
@@ -76,7 +83,7 @@ program.command('get')
   .argument('[KEY]', 'environment variable name')
   .option('-e, --env <strings...>', 'environment variable(s) set as string (example: "HELLO=World")', collectEnvs('env'), [])
   .option('-f, --env-file <path>', 'path(s) to your env file(s)', collectEnvs('envFile'), [])
-  .option('-fk, --env-keys-file <path>', 'path to your .env.keys file (default: same path as your env file)')
+  .option('-fk, --env-keys-file <path>', 'path(s) to your .env.keys file(s) (default: same path as your env file)', collectEnvKeys)
   .option('-o, --overload', 'override existing env variables (by default, existing env vars take precedence over .env files)')
   .option('--strict', 'process.exit(1) on any errors', false)
   .option('--convention <name>', 'load a .env convention (available conventions: [\'nextjs\', \'flow\'])')
@@ -101,7 +108,7 @@ program.command('set')
   .argument('KEY', 'KEY')
   .argument('[value]', 'value')
   .option('-f, --env-file <path>', 'path(s) to your env file(s)', collectEnvs('envFile'), [])
-  .option('-fk, --env-keys-file <path>', 'path to your .env.keys file (default: same path as your env file)')
+  .option('-fk, --env-keys-file <path>', 'path(s) to your .env.keys file(s) (default: same path as your env file)', collectEnvKeys)
   .option('-c, --encrypt', 'encrypt value', true)
   .option('-p, --plain', 'store value as plain text', false)
   .option('--no-create', 'do not create .env file(s) when missing')
@@ -116,7 +123,7 @@ program.command('set')
 program.command('encrypt')
   .description('encrypt .env file(s)')
   .option('-f, --env-file <path>', 'path(s) to your env file(s)', collectEnvs('envFile'), [])
-  .option('-fk, --env-keys-file <path>', 'path to your .env.keys file (default: same path as your env file)')
+  .option('-fk, --env-keys-file <path>', 'path(s) to your .env.keys file(s) (default: same path as your env file)', collectEnvKeys)
   .option('-k, --key <keys...>', 'keys(s) to encrypt (default: all keys in file)')
   .option('-ek, --exclude-key <excludeKeys...>', 'keys(s) to exclude from encryption (default: none)')
   .option('--stdout', 'send to stdout')
@@ -133,7 +140,7 @@ program.command('encrypt')
 program.command('decrypt')
   .description('decrypt .env file(s)')
   .option('-f, --env-file <path>', 'path(s) to your env file(s)', collectEnvs('envFile'), [])
-  .option('-fk, --env-keys-file <path>', 'path to your .env.keys file (default: same path as your env file)')
+  .option('-fk, --env-keys-file <path>', 'path(s) to your .env.keys file(s) (default: same path as your env file)', collectEnvKeys)
   .option('-k, --key <keys...>', 'keys(s) to decrypt (default: all keys in file)')
   .option('-ek, --exclude-key <excludeKeys...>', 'keys(s) to exclude from decryption (default: none)')
   .option('--no-armor', 'disable Dotenvx Armor features')
