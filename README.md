@@ -2327,6 +2327,11 @@ CMD ["/usr/local/bin/dotenvx", "run", "--", "node", "apps/backend/index.js"]
 
 Lock private keys with a local passphrase to keep them protected inside `.env.keys`.
 
+```
+# example
+DOTENV_PRIVATE_KEY=locked:02f5b97ad58b49ae324cd4e7937bc19b251d006b31cacf46f789eeaf03f923cedc:AZIPDxKqjPLiGl5b4CqVGbR3CIBDUcqHthGaoeWLoUvxbTHJkj3jGoGWGaxFSDUJGQUmWDaExRzxKpVydYF_7qiWr1ecqksOFho5t3EMwKbqX2-y-LZO9K3a4SJaYAjDJXpn3NwG4vAt1oLmGA
+```
+
 </details>
 <details><summary>`lock up`</summary><br>
 
@@ -2334,6 +2339,13 @@ Lock a private key in `.env.keys` with a local passphrase.
 
 ```sh
 $ dotenvx lock up
+```
+
+Here's what a locked key looks like:
+
+```ini
+# .env.keys
+DOTENV_PRIVATE_KEY=locked:02f5b97ad58b49ae324cd4e7937bc19b251d006b31cacf46f789eeaf03f923cedc:AZIPDxKqjPLiGl5b4CqVGbR3CIBDUcqHthGaoeWLoUvxbTHJkj3jGoGWGaxFSDUJGQUmWDaExRzxKpVydYF_7qiWr1ecqksOFho5t3EMwKbqX2-y-LZO9K3a4SJaYAjDJXpn3NwG4vAt1oLmGA
 ```
 
 Specify files with `-f` and `-fk`.
