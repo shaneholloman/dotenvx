@@ -1,6 +1,6 @@
 const fs = require('fs')
 const path = require('path')
-const { Conf, dotenv, envPaths, systeminformation } = require('@dotenvx/tooling')
+const { Conf, dotenv, envPaths } = require('@dotenvx/tooling')
 
 const jsonToEnv = require('./../lib/helpers/jsonToEnv')
 const packageJson = require('./../lib/helpers/packageJson')
@@ -146,6 +146,7 @@ class Session {
   }
 
   async systemInformation () {
+    const { systeminformation } = require('@dotenvx/tooling')
     const system = await systeminformation.system()
     const osInfo = await systeminformation.osInfo()
 

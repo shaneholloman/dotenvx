@@ -10,7 +10,7 @@ async function createSpinner (options = {}) {
   const text = options.text || 'thinking'
   const frames = options.frames || FRAMES
 
-  const { yoctoSpinner } = require('@dotenvx/tooling')
+  const { default: yoctoSpinner } = await import('yocto-spinner')
   return yoctoSpinner({
     text,
     spinner: {
