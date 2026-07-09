@@ -153,6 +153,39 @@ Hello Dotenvx
 ```
 
 </details>
+<details><summary>Astro 🚀</summary><br>
+
+Preface Astro scripts with `dotenvx run --` and read your env values in Astro.
+
+```json
+{
+  "scripts": {
+    "dev": "dotenvx run -- astro dev",
+    "build": "dotenvx run -- astro build",
+    "preview": "dotenvx run -- astro preview"
+  }
+}
+```
+
+```astro
+export async function GET() {
+  return new Response(
+    JSON.stringify({
+      HELLO: process.env.HELLO,
+    }),
+    {
+      status: 200,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
+}
+```
+
+see [astro guide](https://dotenvx.com/docs/secrets-in-astro)
+
+</details>
 <details><summary>Expo 🧭</summary><br>
 
 Preface Expo scripts with `dotenvx run --`.
@@ -243,6 +276,20 @@ export default {
 ```
 
 </details>
+<details><summary>Bun 🥟</summary><br>
+
+```sh
+$ echo "HELLO=Test" > .env.test
+$ echo "console.log('Hello ' + process.env.HELLO)" > index.js
+
+$ bun index.js
+Hello undefined
+
+$ dotenvx run -f .env.test -- bun index.js
+Hello Test
+```
+
+</details>
 <details><summary>Deno 🦕</summary><br>
 
 ```sh
@@ -265,20 +312,6 @@ Hello Dotenvx
 > ```
 > 
 > Instead, use `dotenvx` as designed, by installing the cli as a binary - via curl, brew, etc.
-
-</details>
-<details><summary>Bun 🥟</summary><br>
-
-```sh
-$ echo "HELLO=Test" > .env.test
-$ echo "console.log('Hello ' + process.env.HELLO)" > index.js
-
-$ bun index.js
-Hello undefined
-
-$ dotenvx run -f .env.test -- bun index.js
-Hello Test
-```
 
 </details>
 <details><summary>Python 🐍</summary><br>
@@ -2962,7 +2995,7 @@ This is known as *Decryption at Access* and is written about in [the whitepaper]
   * [PHP](https://dotenvx.com/docs/languages/php)
   * [Rust](https://dotenvx.com/docs/languages/rust)
 * [Frameworks](https://dotenvx.com/docs#frameworks)
-  * [Astro](https://dotenvx.com/docs/frameworks/astro)
+  * [Astro](https://dotenvx.com/docs/secrets-in-astro)
   * [Expo](https://dotenvx.com/docs/secrets-in-expo)
   * [Express](https://dotenvx.com/docs/frameworks/express)
   * [Next](https://dotenvx.com/docs/frameworks/next)
