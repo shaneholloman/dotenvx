@@ -4,6 +4,7 @@ const path = require('path')
 const t = require('tap')
 const proxyquire = require('proxyquire')
 const sinon = require('sinon')
+const tooling = require('@dotenvx/tooling')
 
 t.beforeEach(() => {
   process.env.DOTENVX_CONFIG = fs.mkdtempSync(path.join(os.tmpdir(), 'dotenvx-session-'))
@@ -96,7 +97,7 @@ t.test('Session logout does not create config when config is absent', ct => {
   }
 
   const Session = proxyquire('../../src/db/session', {
-    conf: FakeConf
+    '@dotenvx/tooling': { ...tooling, Conf: FakeConf }
   })
   const sesh = new Session()
 
@@ -114,7 +115,7 @@ t.test('Session does not open config for status helpers when config is absent', 
   }
 
   const Session = proxyquire('../../src/db/session', {
-    conf: FakeConf
+    '@dotenvx/tooling': { ...tooling, Conf: FakeConf }
   })
   const sesh = new Session()
 
@@ -138,7 +139,7 @@ t.test('Session notifyUpdate does not create config when config is absent', asyn
   }
 
   const Session = proxyquire('../../src/db/session', {
-    conf: FakeConf
+    '@dotenvx/tooling': { ...tooling, Conf: FakeConf }
   })
   const sesh = new Session()
 
@@ -173,7 +174,7 @@ t.test('Session notifyUpdate checks dotenvx VERSION endpoint and stores dotenvx 
   }
 
   const Session = proxyquire('../../src/db/session', {
-    conf: FakeConf,
+    '@dotenvx/tooling': { ...tooling, Conf: FakeConf },
     './../lib/helpers/http': { http: httpStub },
     './../lib/helpers/packageJson': { version: '1.0.0' }
   })
@@ -210,7 +211,7 @@ t.test('Session notifyUpdate skips check when dotenvx version was checked recent
   }
 
   const Session = proxyquire('../../src/db/session', {
-    conf: FakeConf,
+    '@dotenvx/tooling': { ...tooling, Conf: FakeConf },
     './../lib/helpers/http': { http: httpStub },
     './../lib/helpers/packageJson': { version: '1.0.0' }
   })
@@ -223,18 +224,21 @@ t.test('Session notifyUpdate skips check when dotenvx version was checked recent
 
 t.test('Session supports default config path when DOTENVX_CONFIG is unset', ct => {
   delete process.env.DOTENVX_CONFIG
+  const defaultConfig = fs.mkdtempSync(path.join(os.tmpdir(), 'dotenvx-default-session-'))
   const Session = proxyquire('../../src/db/session', {
-    'env-paths': () => ({ config: '/tmp/default-dotenvx-config' })
+    '@dotenvx/tooling': { ...tooling, envPaths: () => ({ config: defaultConfig }) }
   })
   const sesh = new Session()
 
-  ct.equal(sesh.path(), '/tmp/default-dotenvx-config/.env')
+  ct.equal(sesh.path(), path.join(defaultConfig, '.env'))
   ct.equal(sesh.hostname(), 'https://armor.dotenvx.com')
+  ct.notOk(fs.existsSync(path.join(defaultConfig, '.env')), 'default config file is not created')
   ct.end()
 })
 
 t.test('Session creates default store on login when DOTENVX_CONFIG is unset', ct => {
   delete process.env.DOTENVX_CONFIG
+  const defaultConfig = fs.mkdtempSync(path.join(os.tmpdir(), 'dotenvx-default-session-'))
   let confOptions
   class FakeConf {
     constructor (options) {
@@ -253,7 +257,7 @@ t.test('Session creates default store on login when DOTENVX_CONFIG is unset', ct
   }
 
   const Session = proxyquire('../../src/db/session', {
-    conf: FakeConf
+    '@dotenvx/tooling': { ...tooling, Conf: FakeConf, envPaths: () => ({ config: defaultConfig }) }
   })
   const sesh = new Session()
 
@@ -308,6 +312,7 @@ t.test('Device reuses existing private key', ct => {
 
 t.test('Device supports default config path and empty private key branch', ct => {
   delete process.env.DOTENVX_CONFIG
+  const defaultConfig = fs.mkdtempSync(path.join(os.tmpdir(), 'dotenvx-default-device-'))
   let confOptions
   class FakeConf {
     constructor (options) {
@@ -322,7 +327,7 @@ t.test('Device supports default config path and empty private key branch', ct =>
   }
 
   const Device = proxyquire('../../src/db/device', {
-    conf: FakeConf
+    '@dotenvx/tooling': { ...tooling, Conf: FakeConf, envPaths: () => ({ config: defaultConfig }) }
   })
   const device = new Device()
 

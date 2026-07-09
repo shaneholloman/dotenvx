@@ -124,7 +124,7 @@ jobs:
       - name: pkg
         run: |
           echo "pkg-ing"
-          node esbuild.js
+          node esbuild.js --minify
           cd ./build
           ../node_modules/.bin/pkg . --public-packages "*" --public --target node20-linuxstatic-x86_64 --output ../bin/linux-x86_64/dotenvx
       - name: verify version
@@ -240,7 +240,7 @@ jobs:
       - name: pkg
         run: |
           echo "pkg-ing"
-          node esbuild.js
+          node esbuild.js --minify
           cd ./build
           ../node_modules/.bin/pkg . --public-packages "*" --public --target node20-macos-x64 --output ../bin/darwin-amd64/dotenvx
           ../node_modules/.bin/pkg . --public-packages "*" --public --target node20-macos-x64 --output ../bin/darwin-x86_64/dotenvx
