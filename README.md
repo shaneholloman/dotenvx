@@ -843,25 +843,45 @@ Hello Dotenvx
 Note the `DOTENV_PRIVATE_KEY` instructs `dotenvx run` to load the `.env` file and the `DOTENV_PRIVATE_KEY_PRODUCTION` instructs it to load the `.env.production` file. See the pattern?
 
 </details>
-<details><summary>combine multiple encrypted .env files for monorepo</summary><br>
+<details><summary>use directories with monorepos</summary><br>
 
-```sh
-$ mkdir app1
-$ mkdir app2
-$ dotenvx set HELLO app1 -f app1/.env.ci
-$ dotenvx set HELLO app2 -f app2/.env.ci
-$ echo "console.log('Hello ' + process.env.HELLO)" > index.js
+Point `-f` at a directory to load the `.env` inside it. From a workspace, this makes a shared root `.env` available without repeating its filename.
 
-$ DOTENV_PRIVATE_KEY_CI="<app1/privat ci key>,<app2/private ci key>" dotenvx run -f app1/.env.ci -f app2/.env.ci -- node index.js
-[dotenvx@1.X.X] injecting env (2) from app1/.env.ci,app2/.env.ci
-Hello app1
-
-$ DOTENV_PRIVATE_KEY_CI="<app1/privat ci key>,<app2/private ci key>" dotenvx run -f app1/.env.ci -f app2/.env.ci --overload -- node index.js
-[dotenvx@1.X.X] injecting env (2) from app1/.env.ci,app2/.env.ci
-Hello app2
+```text
+my-monorepo/
+  .env
+  .env.keys
+  apps/
+    web/
+      index.js
 ```
 
-Note the `DOTENV_PRIVATE_KEY_CI` (and any `DOTENV_PRIVATE_KEY*`) can take multiple private keys by simply comma separating them.
+```sh
+$ cd apps/web
+
+$ dotenvx get HELLO -f ../..
+World
+
+$ dotenvx run -f ../.. -- node index.js
+[dotenvx@1.X.X] injecting env (1) from ../../.env
+Hello World
+```
+
+Encrypted values work without extra configuration when `.env.keys` sits beside the resolved `.env`.
+
+The directory also becomes the base when using a convention:
+
+```sh
+$ dotenvx run -f ../.. --convention=nextjs -- node index.js
+[dotenvx@1.X.X] injecting env (1) from ../../.env.development.local, ../../.env.local, ../../.env.development, ../../.env
+Hello development local
+```
+
+If a workspace has its own `.env` but shares the root `.env.keys`, point `-fk` at the root directory:
+
+```sh
+$ dotenvx run -f . -fk ../.. -- node index.js
+```
 
 </details>
 <details><summary>`--stdout`</summary><br>
