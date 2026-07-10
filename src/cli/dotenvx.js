@@ -17,7 +17,7 @@ const envs = []
 function collectEnvs (type) {
   return function (value, previous) {
     envs.push({ type, value })
-    return previous.concat([value])
+    return (previous || []).concat([value])
   }
 }
 
@@ -156,7 +156,7 @@ program.command('keypair')
   .usage('[KEY] [options]')
   .description('print public/private keys for .env file(s)')
   .argument('[KEY]', 'environment variable key name')
-  .option('-f, --env-file <path>', 'path(s) to your env file(s)', collectEnvs('envFile'), [])
+  .option('-f, --env-file <path>', 'path(s) to your env file(s)', collectEnvs('envFile'))
   .option('-fk, --env-keys-file <path>', 'path(s) to your .env.keys file(s) (default: same path as your env file)', collectEnvKeys)
   .option('--no-armor', 'disable Dotenvx Armor features')
   .option('--no-native', 'disable OS secret store features')

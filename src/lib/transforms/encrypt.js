@@ -42,6 +42,7 @@ async function encryptTransform (options = {}) {
   const changedFilepaths = []
   const unchangedFilepaths = []
 
+  // set up keysSrc
   let keysSrc
   if (await fsx.exists(fk)) {
     try {
