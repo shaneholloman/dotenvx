@@ -8,8 +8,9 @@ const createSpinner = require('../../lib/helpers/createSpinner')
 const Session = require('../../db/session')
 const normalizeDotenvConfigQuiet = require('../../lib/helpers/normalizeDotenvConfigQuiet')
 const normalizeDotenvConfigConvention = require('../../lib/helpers/normalizeDotenvConfigConvention')
+const buildCommandEnvs = require('../../lib/helpers/buildCommandEnvs')
+const resolveEnvKeysFile = require('../../lib/helpers/resolveEnvKeysFile')
 
-const conventions = require('./../../lib/helpers/conventions')
 const { determine } = require('./../../lib/helpers/envResolution')
 
 function inferCommandArgsFromProcessArgv (argv) {
@@ -80,13 +81,7 @@ async function run () {
   }
 
   try {
-    let envs = []
-    // handle shorthand conventions - like --convention=nextjs
-    if (options.convention) {
-      envs = conventions(options.convention).concat(this.envs)
-    } else {
-      envs = this.envs
-    }
+    let envs = buildCommandEnvs(this.envs, options.convention)
     envs = determine(envs, process.env)
 
     const {
@@ -96,7 +91,7 @@ async function run () {
       envs,
       overload: options.overload,
       processEnv: process.env,
-      envKeysFile: options.envKeysFile,
+      envKeysFile: resolveEnvKeysFile(options.envKeysFile),
       noArmor,
       noKeychain,
       token: options.token,
