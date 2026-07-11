@@ -5,6 +5,7 @@ const readEnvKey = require('../helpers/readEnvKey')
 const upsertEnvKey = require('../helpers/upsertEnvKey')
 const armoredKeyDisplay = require('../helpers/armoredKeyDisplay')
 const windowsCredentialManager = require('../helpers/windowsCredentialManager')
+const linuxSecretService = require('../helpers/linuxSecretService')
 
 const SECURITY_BIN = '/usr/bin/security'
 const SERVICE = 'dotenvx'
@@ -12,6 +13,10 @@ const SERVICE = 'dotenvx'
 function findGenericPassword (publicKey) {
   if (process.platform === 'win32') {
     return windowsCredentialManager.findGenericPassword(publicKey)
+  }
+
+  if (process.platform === 'linux') {
+    return linuxSecretService.findGenericPassword(publicKey)
   }
 
   return execFileSync(SECURITY_BIN, ['find-generic-password', '-s', SERVICE, '-a', publicKey, '-w'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim()
@@ -39,7 +44,9 @@ class KeychainPull {
       privateKey = findGenericPassword(publicKey)
       if (!privateKey) throw new Error('not found')
     } catch {
-      const secretStore = process.platform === 'win32' ? 'Windows Credential Manager' : 'macOS Keychain'
+      const secretStore = process.platform === 'win32'
+        ? 'Windows Credential Manager'
+        : process.platform === 'linux' ? 'Linux Secret Service' : 'macOS Keychain'
       throw new Error(`[NOT_FOUND] private key not found in ${secretStore} (${armoredKeyDisplay(publicKey)}). fix: [dotenvx native up]`)
     }
 

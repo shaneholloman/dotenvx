@@ -1,6 +1,7 @@
 const { execFileSync } = require('child_process')
 
 const windowsCredentialManager = require('../../helpers/windowsCredentialManager')
+const linuxSecretService = require('../../helpers/linuxSecretService')
 
 const SECURITY_BIN = '/usr/bin/security'
 const SERVICE = 'dotenvx'
@@ -10,12 +11,17 @@ function findMacosPrivateKey (publicKeyHex) {
 }
 
 function index (publicKeyHex) {
-  if (process.platform !== 'darwin' && process.platform !== 'win32') return {}
+  if (!['darwin', 'linux', 'win32'].includes(process.platform)) return {}
 
   try {
-    const privateKeyHex = process.platform === 'win32'
-      ? windowsCredentialManager.findGenericPassword(publicKeyHex)
-      : findMacosPrivateKey(publicKeyHex)
+    let privateKeyHex
+    if (process.platform === 'win32') {
+      privateKeyHex = windowsCredentialManager.findGenericPassword(publicKeyHex)
+    } else if (process.platform === 'linux') {
+      privateKeyHex = linuxSecretService.findGenericPassword(publicKeyHex)
+    } else {
+      privateKeyHex = findMacosPrivateKey(publicKeyHex)
+    }
 
     if (!privateKeyHex) return {}
 

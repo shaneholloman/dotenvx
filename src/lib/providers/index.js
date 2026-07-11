@@ -44,7 +44,7 @@ function armorProviderForOptions (options) {
 }
 
 function useNative (options) {
-  if (process.platform !== 'darwin' && process.platform !== 'win32') return false
+  if (!['darwin', 'linux', 'win32'].includes(process.platform)) return false
   if (process.env.CI) return false
   return options.noNative !== true && options.native !== false && options.noKeychain !== true
 }
