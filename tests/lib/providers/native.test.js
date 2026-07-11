@@ -18,16 +18,19 @@ t.afterEach(() => {
 t.test('native provider is disabled outside supported platforms', ct => {
   const execFileSync = sinon.stub()
   const findGenericPassword = sinon.stub()
+  const findLinuxSecret = sinon.stub()
   const provider = proxyquire('../../../src/lib/providers/native', {
     child_process: { execFileSync },
-    '../../helpers/windowsCredentialManager': { findGenericPassword }
+    '../../helpers/windowsCredentialManager': { findGenericPassword },
+    '../../helpers/linuxSecretService': { findGenericPassword: findLinuxSecret }
   })
 
-  setPlatform('linux')
+  setPlatform('freebsd')
 
   ct.same(provider('public-key'), {})
   ct.equal(execFileSync.callCount, 0)
   ct.equal(findGenericPassword.callCount, 0)
+  ct.equal(findLinuxSecret.callCount, 0)
   ct.end()
 })
 
@@ -54,6 +57,19 @@ t.test('native provider reads Windows Credential Manager on win32', ct => {
   })
 
   setPlatform('win32')
+
+  ct.same(provider('public-key'), { 'public-key': 'private-key' })
+  ct.same(findGenericPassword.firstCall.args, ['public-key'])
+  ct.end()
+})
+
+t.test('native provider reads Linux Secret Service on linux', ct => {
+  const findGenericPassword = sinon.stub().returns('private-key')
+  const provider = proxyquire('../../../src/lib/providers/native', {
+    '../../helpers/linuxSecretService': { findGenericPassword }
+  })
+
+  setPlatform('linux')
 
   ct.same(provider('public-key'), { 'public-key': 'private-key' })
   ct.same(findGenericPassword.firstCall.args, ['public-key'])

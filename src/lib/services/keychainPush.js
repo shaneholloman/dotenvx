@@ -4,6 +4,7 @@ const keynames = require('../conventions/keynames')
 const readEnvKey = require('../helpers/readEnvKey')
 const armoredKeyDisplay = require('../helpers/armoredKeyDisplay')
 const windowsCredentialManager = require('../helpers/windowsCredentialManager')
+const linuxSecretService = require('../helpers/linuxSecretService')
 
 const SECURITY_BIN = '/usr/bin/security'
 const SERVICE = 'dotenvx'
@@ -11,6 +12,11 @@ const SERVICE = 'dotenvx'
 function addGenericPassword (publicKey, label, privateKey) {
   if (process.platform === 'win32') {
     windowsCredentialManager.addGenericPassword(publicKey, privateKey)
+    return
+  }
+
+  if (process.platform === 'linux') {
+    linuxSecretService.addGenericPassword(publicKey, label, privateKey)
     return
   }
 
@@ -24,6 +30,10 @@ function addGenericPassword (publicKey, label, privateKey) {
 function findGenericPassword (publicKey) {
   if (process.platform === 'win32') {
     return windowsCredentialManager.findGenericPassword(publicKey)
+  }
+
+  if (process.platform === 'linux') {
+    return linuxSecretService.findGenericPassword(publicKey)
   }
 
   return execFileSync(SECURITY_BIN, ['find-generic-password', '-s', SERVICE, '-a', publicKey, '-w'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim()
