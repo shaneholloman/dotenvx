@@ -8,6 +8,7 @@ const getResolver = require('./../../lib/resolvers/get')
 const normalizeDotenvConfigConvention = require('../../lib/helpers/normalizeDotenvConfigConvention')
 const buildCommandEnvs = require('../../lib/helpers/buildCommandEnvs')
 const resolveEnvKeysFile = require('../../lib/helpers/resolveEnvKeysFile')
+const mask = require('../../lib/helpers/mask')
 
 async function get (key) {
   const options = normalizeDotenvConfigConvention(this.opts())
@@ -60,12 +61,16 @@ async function get (key) {
       if (single === undefined) {
         console.log('')
       } else {
-        console.log(single)
+        console.log(options.mask ? mask(single) : single)
       }
     } else {
+      const output = options.mask
+        ? Object.fromEntries(Object.entries(parsed).map(([key, value]) => [key, mask(value)]))
+        : parsed
+
       if (options.format === 'eval') {
         let inline = ''
-        for (const [key, value] of Object.entries(parsed)) {
+        for (const [key, value] of Object.entries(output)) {
           inline += `${key}=${escape(value)}\n`
         }
         inline = inline.trim()
@@ -73,7 +78,7 @@ async function get (key) {
         console.log(inline)
       } else if (options.format === 'shell') {
         let inline = ''
-        for (const [key, value] of Object.entries(parsed)) {
+        for (const [key, value] of Object.entries(output)) {
           inline += `${key}=${value} `
         }
         inline = inline.trim()
@@ -81,7 +86,7 @@ async function get (key) {
         console.log(inline)
       } else if (options.format === 'colon') {
         let inline = ''
-        for (const [key, value] of Object.entries(parsed)) {
+        for (const [key, value] of Object.entries(output)) {
           inline += `${key}:${value} `
         }
         inline = inline.trim()
@@ -93,7 +98,7 @@ async function get (key) {
           space = 2
         }
 
-        console.log(JSON.stringify(parsed, null, space))
+        console.log(JSON.stringify(output, null, space))
       }
     }
 
