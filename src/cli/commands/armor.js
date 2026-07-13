@@ -91,6 +91,9 @@ function configureArmorCommand (armor) {
       return require('./../actions/logout').apply(this, args)
     })
 
+  // dotenvx armor settings
+  require('./settings')(armor.command('settings'))
+
   return armor
 }
 

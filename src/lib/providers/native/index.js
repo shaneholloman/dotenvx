@@ -1,27 +1,52 @@
-const { execFileSync } = require('child_process')
-
+const macosKeychain = require('../../helpers/macosKeychain')
 const windowsCredentialManager = require('../../helpers/windowsCredentialManager')
 const linuxSecretService = require('../../helpers/linuxSecretService')
 
-const SECURITY_BIN = '/usr/bin/security'
-const SERVICE = 'dotenvx'
+function get (key) {
+  if (process.platform === 'win32') {
+    return windowsCredentialManager.get(key)
+  }
 
-function findMacosPrivateKey (publicKeyHex) {
-  return execFileSync(SECURITY_BIN, ['find-generic-password', '-s', SERVICE, '-a', publicKeyHex, '-w'], { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim()
+  if (process.platform === 'linux') {
+    return linuxSecretService.get(key)
+  }
+
+  return macosKeychain.get(key)
+}
+
+function set (key, value, label = key) {
+  if (process.platform === 'win32') {
+    windowsCredentialManager.set(key, value, label)
+    return
+  }
+
+  if (process.platform === 'linux') {
+    linuxSecretService.set(key, value, label)
+    return
+  }
+
+  macosKeychain.set(key, value, label)
+}
+
+index.delete = function (key) {
+  if (process.platform === 'win32') {
+    windowsCredentialManager.delete(key)
+    return
+  }
+
+  if (process.platform === 'linux') {
+    linuxSecretService.delete(key)
+    return
+  }
+
+  macosKeychain.delete(key)
 }
 
 function index (publicKeyHex) {
   if (!['darwin', 'linux', 'win32'].includes(process.platform)) return {}
 
   try {
-    let privateKeyHex
-    if (process.platform === 'win32') {
-      privateKeyHex = windowsCredentialManager.findGenericPassword(publicKeyHex)
-    } else if (process.platform === 'linux') {
-      privateKeyHex = linuxSecretService.findGenericPassword(publicKeyHex)
-    } else {
-      privateKeyHex = findMacosPrivateKey(publicKeyHex)
-    }
+    const privateKeyHex = get(publicKeyHex)
 
     if (!privateKeyHex) return {}
 
@@ -30,5 +55,8 @@ function index (publicKeyHex) {
     return {}
   }
 }
+
+index.set = set
+index.get = get
 
 module.exports = index

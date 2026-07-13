@@ -5,6 +5,7 @@ const { Conf, dotenv, envPaths } = require('@dotenvx/tooling')
 const jsonToEnv = require('./../lib/helpers/jsonToEnv')
 const packageJson = require('./../lib/helpers/packageJson')
 const { http } = require('./../lib/helpers/http')
+const nativeProvider = require('./../lib/providers/native')
 const { logger } = require('./../shared/logger')
 
 const HOURS_24 = 60 * 60 * 24 * 1000
@@ -14,7 +15,8 @@ const ARMOR = {
   HOSTNAME: 'DOTENVX_ARMOR_HOSTNAME',
   USER: 'DOTENVX_ARMOR_USER',
   USERNAME: 'DOTENVX_ARMOR_USERNAME',
-  TOKEN: 'DOTENVX_ARMOR_TOKEN'
+  TOKEN: 'DOTENVX_ARMOR_TOKEN',
+  ON: 'DOTENVX_ARMOR_ON'
 }
 
 const DOTENVX = {
@@ -100,7 +102,7 @@ class Session {
 
   status () {
     // if logged in
-    if (this.username() && this.token()) {
+    if (this.username() && this.token() && this.on()) {
       return 'on'
     }
 
@@ -133,7 +135,15 @@ class Session {
   }
 
   token () {
-    return this.readSetting('TOKEN') || undefined
+    return this.getFromSecretStore(ARMOR.TOKEN) || undefined
+  }
+
+  on () {
+    return (this.readSetting('ON') || 'true') === 'true'
+  }
+
+  off () {
+    return (this.readSetting('ON') || 'true') === 'false'
   }
 
   devicePublicKey () {
@@ -187,7 +197,7 @@ class Session {
       store.set(DOTENVX.VERSION_LAST_CHECK, now)
 
       if (versionGreaterThan(remote, packageJson.version)) {
-        console.error('⛆ update available [npm install @dotenvx/dotenvx@latest]')
+        console.error('⛆ update available [curl -sfS https://dotenvx.sh | sh]')
       }
     } catch (error) {
       logger.debug(error.message)
@@ -222,6 +232,47 @@ class Session {
   //
   // Set/Delete
   //
+  getFromSecretStore (key) {
+    try {
+      const value = nativeProvider.get(key)
+      if (value) return value
+    } catch {}
+
+    const store = this.openStore()
+    if (!store) return undefined
+
+    return store.get(key)
+  }
+
+  setInSecretStore (key, value) {
+    try {
+      nativeProvider.set(key, value)
+      return value
+    } catch {
+      this.createStore().set(key, value)
+      return value
+    }
+  }
+
+  deleteFromSecretStore (key) {
+    try {
+      nativeProvider.delete(key)
+    } catch {}
+
+    const store = this.openStore()
+    if (store) store.delete(key)
+  }
+
+  turnOn () {
+    this.createStore().set(ARMOR.ON, 'true')
+    return 'true'
+  }
+
+  turnOff () {
+    this.createStore().set(ARMOR.ON, 'false')
+    return 'false'
+  }
+
   login (hostname, id, username, accessToken) {
     if (!hostname) {
       throw new Error('DOTENVX_ARMOR_HOSTNAME not set. Run [dotenvx armor login]')
@@ -242,8 +293,9 @@ class Session {
     const store = this.createStore()
     store.set(ARMOR.USER, id)
     store.set(ARMOR.USERNAME, username)
-    store.set(ARMOR.TOKEN, accessToken)
+    this.setInSecretStore(ARMOR.TOKEN, accessToken)
     store.set(ARMOR.HOSTNAME, hostname)
+    store.set(ARMOR.ON, 'true')
 
     return accessToken
   }
@@ -261,13 +313,14 @@ class Session {
       throw new Error('DOTENVX_ARMOR_TOKEN not set. Run [dotenvx armor login]')
     }
 
+    this.deleteFromSecretStore(ARMOR.TOKEN)
+
     const store = this.openStore()
     if (!store) return true
-
     store.delete(ARMOR.USER)
     store.delete(ARMOR.USERNAME)
-    store.delete(ARMOR.TOKEN)
     store.delete(ARMOR.HOSTNAME)
+    store.delete(ARMOR.ON)
     store.delete(DOTENVX.VERSION)
     store.delete(DOTENVX.VERSION_LAST_CHECK)
     return true
