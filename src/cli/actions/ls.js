@@ -12,13 +12,30 @@ async function ls (directory) {
   logger.debug(`directory: ${directory}`)
 
   const options = this.opts()
-  const spinnerOptions = typeof this.optsWithGlobals === 'function' ? this.optsWithGlobals() : options
+  let spinnerOptions
+  if (typeof this.optsWithGlobals === 'function') {
+    spinnerOptions = this.optsWithGlobals()
+  } else {
+    spinnerOptions = options
+  }
   const spinner = await createSpinner({ ...spinnerOptions, ...options, text: 'traversing' })
+  const startedAt = Date.now()
+  let directoryCount = 0
   logger.debug(`options: ${JSON.stringify(options)}`)
 
   try {
     const filepaths = await main.ls(directory, options.envFile, options.excludeEnvFile, (filepath) => {
-      if (spinner) spinner.text = `traversing ${filepath}`
+      directoryCount += 1
+
+      if (spinner) {
+        const elapsedSeconds = Math.floor((Date.now() - startedAt) / 1000)
+        let directoryLabel = 'directories'
+        if (directoryCount === 1) {
+          directoryLabel = 'directory'
+        }
+
+        spinner.text = `traversing ${directoryCount.toLocaleString()} ${directoryLabel} (${elapsedSeconds}s) — ${filepath}`
+      }
     })
     logger.debug(`filepaths: ${JSON.stringify(filepaths)}`)
 

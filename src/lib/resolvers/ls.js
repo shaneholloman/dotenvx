@@ -24,7 +24,12 @@ async function ls (options = {}) {
   const envFile = options.envFile || ['.env*']
   const excludeEnvFile = options.excludeEnvFile || []
   const excludePatterns = excludePatternsFor(excludeEnvFile)
-  const excludes = excludePatterns.length > 0 ? ignore.concat(excludePatterns) : ignore
+  let excludes
+  if (excludePatterns.length > 0) {
+    excludes = ignore.concat(excludePatterns)
+  } else {
+    excludes = ignore
+  }
   const exclude = match(excludes, { dot: true })
   const include = match(patternsFor(envFile), {
     dot: true,
