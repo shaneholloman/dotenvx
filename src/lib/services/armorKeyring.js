@@ -3,11 +3,16 @@ const PostArmorKeyring = require('../api/postArmorKeyring')
 const ACCESS_APPROVAL_REQUIRED = 'ACCESS_APPROVAL_REQUIRED'
 const ACCESS_APPROVAL_PENDING = 'ACCESS_APPROVAL_PENDING'
 const ACCESS_PENDING = 'ACCESS_PENDING'
+const SERVER_SIDE_DECRYPTION_REQUIRED = 'SERVER_SIDE_DECRYPTION_REQUIRED'
 const POLL_INTERVAL = 1000
 const POLL_TIMEOUT = 5 * 60 * 1000
 
 function grantTokenFromError (error) {
   return error.meta && error.meta.grant_token
+}
+
+function isServerSideDecryptionRequired (error) {
+  return error.code === SERVER_SIDE_DECRYPTION_REQUIRED
 }
 
 function isAccessApprovalRequired (error) {
@@ -69,6 +74,11 @@ class ArmorKeyring {
     try {
       return await this.request()
     } catch (error) {
+      if (isServerSideDecryptionRequired(error)) {
+        // to do, make request to /api/armor/decrypt
+        throw new Error('implement me')
+      }
+
       if (!isAccessApprovalRequired(error)) {
         throw error
       }
