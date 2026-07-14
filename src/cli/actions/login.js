@@ -11,7 +11,7 @@ const openUrl = require('../../lib/helpers/openUrl')
 const FRAMES = ['◐', '◓', '◑', '◒']
 
 async function login () {
-  const options = this.opts()
+  const options = typeof this.optsWithGlobals === 'function' ? this.optsWithGlobals() : this.opts()
   const spinner = await createSpinner({ ...options, text: 'logging in', frames: FRAMES })
 
   logger.debug(`options: ${JSON.stringify(options)}`)

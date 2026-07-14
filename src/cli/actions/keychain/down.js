@@ -4,7 +4,7 @@ const createSpinner = require('../../../lib/helpers/createSpinner')
 const armoredKeyDisplay = require('../../../lib/helpers/armoredKeyDisplay')
 
 async function down () {
-  const options = this.opts()
+  const options = typeof this.optsWithGlobals === 'function' ? this.optsWithGlobals() : this.opts()
   const spinner = await createSpinner({ ...options, text: 'unkeychaining' })
 
   logger.debug(`options: ${JSON.stringify(options)}`)

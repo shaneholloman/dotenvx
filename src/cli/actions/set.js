@@ -10,7 +10,7 @@ const prompts = require('../../lib/helpers/prompts')
 const Session = require('../../db/session')
 
 async function set (key, value) {
-  const options = this.opts()
+  const options = typeof this.optsWithGlobals === 'function' ? this.optsWithGlobals() : this.opts()
 
   let encrypt = true
   let settingMessage = 'encrypting'

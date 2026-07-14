@@ -50,7 +50,8 @@ function uniqueInjectedKeys (processedEnvs) {
 }
 
 async function run () {
-  const options = normalizeDotenvConfigConvention(normalizeDotenvConfigQuiet(this.opts()))
+  const commandOptions = typeof this.optsWithGlobals === 'function' ? this.optsWithGlobals() : this.opts()
+  const options = normalizeDotenvConfigConvention(normalizeDotenvConfigQuiet(commandOptions))
   const maskEnabled = options.mask !== undefined
   let showChar = options.mask
   if (options.mask === true) {

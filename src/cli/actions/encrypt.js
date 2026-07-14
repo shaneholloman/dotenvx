@@ -8,7 +8,7 @@ const createSpinner = require('../../lib/helpers/createSpinner')
 const Session = require('../../db/session')
 
 async function encryptAction () {
-  const options = this.opts()
+  const options = typeof this.optsWithGlobals === 'function' ? this.optsWithGlobals() : this.opts()
   const spinner = await createSpinner({ ...options, text: 'encrypting' })
   const sesh = new Session()
 
