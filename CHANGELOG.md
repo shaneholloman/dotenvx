@@ -2,11 +2,14 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
-[Unreleased](https://github.com/dotenvx/dotenvx/compare/v2.7.3...main)
+[Unreleased](https://github.com/dotenvx/dotenvx/compare/v2.8.0...main)
+
+## [2.8.0](https://github.com/dotenvx/dotenvx/compare/v2.7.3...v2.8.0) (2026-07-14)
 
 ### Added
 
 * Add `FILE_NOT_WRITABLE` error for user convenience ([#891](https://github.com/dotenvx/dotenvx/pull/891))
+* Support Enclaved Armored Keys ([#892](https://github.com/dotenvx/dotenvx/pull/892))
 
 ## [2.7.3](https://github.com/dotenvx/dotenvx/compare/v2.7.2...v2.7.3) (2026-07-13)
 
