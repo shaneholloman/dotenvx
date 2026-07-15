@@ -119,7 +119,7 @@ jobs:
           npm init -y
           npm install "..\$TARBALL"
           "TEST_KEY=value123" | Out-File -FilePath .env.local -Encoding utf8NoBOM
-          $OUTPUT = .\node_modules\.bin\dotenvx.ps1 encrypt --no-armor -f .env.local
+          $OUTPUT = .\node_modules\.bin\dotenvx.ps1 encrypt --no-armor -f .env.local 2>&1
           $OUTPUT_TEXT = $OUTPUT -join [Environment]::NewLine
           Write-Output $OUTPUT_TEXT
           if ($LASTEXITCODE -ne 0) {
