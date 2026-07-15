@@ -1,4 +1,3 @@
-const packageJson = require('../lib/helpers/packageJson')
 const Errors = require('../lib/helpers/errors')
 const { getColor, bold } = require('./colors')
 
@@ -7,7 +6,6 @@ const levels = {
   infoerror: 0,
   warn: 1,
   success: 2,
-  successv: 2,
   info: 2,
   help: 2,
   verbose: 4,
@@ -15,23 +13,26 @@ const levels = {
   silly: 6
 }
 
-const error = (m) => bold(getColor('red')(`☠ ${m}`))
-const infoerror = getColor('gray') // actually an error
-const warn = (m) => getColor('orangered')(`⚠ ${m}`)
-const success = getColor('amber')
-const successv = (m) => getColor('amber')(`⟐ ${m}`)
-const info = getColor('gray')
-const help = getColor('dodgerblue')
-const verbose = (m) => getColor('plum')(`┆ ${m}`)
-const debug = (m) => getColor('plum')(`┆ ${m}`)
+const error = (m, stream) => bold(getColor('red', stream)(`☠ ${m}`), stream)
+const infoerror = (m, stream) => getColor('gray', stream)(m) // actually an error
+const warn = (m, stream) => getColor('orangered', stream)(`⚠ ${m}`)
+const success = (m, stream) => getColor('amber', stream)(m)
+const info = (m, stream) => getColor('gray', stream)(m)
+const help = (m, stream) => getColor('dodgerblue', stream)(m)
+const verbose = (m, stream) => getColor('plum', stream)(`┆ ${m}`)
+const debug = (m, stream) => getColor('plum', stream)(`┆ ${m}`)
 
 let currentLevel = levels.info // default log level
-let currentName = 'dotenvx' // default logger name
-let currentVersion = packageJson.version // default logger version
 
 function stderr (level, message) {
-  const formattedMessage = formatMessage(level, message)
-  console.error(formattedMessage)
+  if (levels[level] === undefined) {
+    throw new Errors({ level }).missingLogLevel()
+  }
+
+  if (levels[level] <= currentLevel) {
+    const formattedMessage = formatMessage(level, message, process.stderr)
+    console.error(formattedMessage)
+  }
 }
 
 function stdout (level, message) {
@@ -40,40 +41,38 @@ function stdout (level, message) {
   }
 
   if (levels[level] <= currentLevel) {
-    const formattedMessage = formatMessage(level, message)
+    const formattedMessage = formatMessage(level, message, process.stdout)
     console.log(formattedMessage)
   }
 }
 
-function formatMessage (level, message) {
+function formatMessage (level, message, stream) {
   const formattedMessage = typeof message === 'object' ? JSON.stringify(message) : message
 
   switch (level.toLowerCase()) {
     // errors
     case 'error':
-      return error(formattedMessage)
+      return error(formattedMessage, stream)
     case 'infoerror':
-      return infoerror(formattedMessage)
+      return infoerror(formattedMessage, stream)
     // warns
     case 'warn':
-      return warn(formattedMessage)
+      return warn(formattedMessage, stream)
     // successes
     case 'success':
-      return success(formattedMessage)
-    case 'successv': // success with 'version'
-      return successv(`${formattedMessage} · ${currentName}@${currentVersion}`)
+      return success(formattedMessage, stream)
     // info
     case 'info':
-      return info(formattedMessage)
+      return info(formattedMessage, stream)
     // help
     case 'help':
-      return help(formattedMessage)
+      return help(formattedMessage, stream)
     // verbose
     case 'verbose':
-      return verbose(formattedMessage)
+      return verbose(formattedMessage, stream)
     // debug
     case 'debug':
-      return debug(formattedMessage)
+      return debug(formattedMessage, stream)
   }
 }
 
@@ -85,18 +84,17 @@ const logger = {
   error: (msg) => stderr('error', msg),
   infoerror: (msg) => stderr('infoerror', msg),
   // warns
-  warn: (msg) => stdout('warn', msg),
+  warn: (msg) => stderr('warn', msg),
   // success
-  success: (msg) => stdout('success', msg),
-  successv: (msg) => stdout('successv', msg),
+  success: (msg) => stderr('success', msg),
   // info
   info: (msg) => stdout('info', msg),
   // help
-  help: (msg) => stdout('help', msg),
+  help: (msg) => stderr('help', msg),
   // verbose
-  verbose: (msg) => stdout('verbose', msg),
+  verbose: (msg) => stderr('verbose', msg),
   // debug
-  debug: (msg) => stdout('debug', msg),
+  debug: (msg) => stderr('debug', msg),
   setLevel: (level) => {
     if (levels[level] !== undefined) {
       currentLevel = levels[level]
@@ -104,11 +102,9 @@ const logger = {
     }
   },
   setName: (name) => {
-    currentName = name
     logger.name = name
   },
   setVersion: (version) => {
-    currentVersion = version
     logger.version = version
   }
 }
