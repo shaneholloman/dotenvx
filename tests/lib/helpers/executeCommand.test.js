@@ -39,6 +39,36 @@ t.test('executeCommand - redacts stdout and stderr even when attached to a TTY',
   ct.end()
 })
 
+t.test('executeCommand - uses a PTY when redacting an interactive terminal', async ct => {
+  const descriptors = ['stdin', 'stdout', 'stderr'].map(name => [name, Object.getOwnPropertyDescriptor(process[name], 'isTTY')])
+  const child = {
+    exitCode: 0,
+    stdout: { on: sinon.stub(), once: sinon.stub() },
+    stderr: { on: sinon.stub(), once: sinon.stub() }
+  }
+
+  for (const [name] of descriptors) {
+    Object.defineProperty(process[name], 'isTTY', { configurable: true, value: true })
+  }
+
+  const execaStub = sinon.stub(execute, 'execa').returns(child)
+
+  await executeCommand(['node', 'index.js'], { HELLO: 'secret' }, ['secret'])
+
+  ct.equal(require('path').basename(execaStub.firstCall.args[0]), 'script')
+  ct.same(execaStub.firstCall.args[2].stdio, ['inherit', 'pipe', 'pipe'])
+
+  for (const [name, descriptor] of descriptors) {
+    if (descriptor) {
+      Object.defineProperty(process[name], 'isTTY', descriptor)
+    } else {
+      delete process[name].isTTY
+    }
+  }
+
+  ct.end()
+})
+
 t.test('executeCommand - exitCode 1', async ct => {
   const execaStub = sinon.stub(execute, 'execa').returns({ exitCode: 1 })
   const processExitStub = sinon.stub(process, 'exit')

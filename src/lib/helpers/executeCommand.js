@@ -4,6 +4,7 @@ const execute = require('./../../lib/helpers/execute')
 const { logger } = require('./../../shared/logger')
 const Errors = require('./errors')
 const { createRedactedStreamWriter, redactOutput } = require('./redactOutput')
+const ptyCommand = require('./ptyCommand')
 
 async function executeCommand (commandArgs, env, sensitiveValues = []) {
   const FORWARD_SIGNAL_GRACE_MS = 1000
@@ -133,8 +134,15 @@ async function executeCommand (commandArgs, env, sensitiveValues = []) {
 
     const redactStdout = sensitiveValues.length > 0
     const redactStderr = sensitiveValues.length > 0
+    const usePty = redactStdout && Boolean(
+      process.stdin && process.stdin.isTTY &&
+      process.stdout && process.stdout.isTTY &&
+      process.stderr && process.stderr.isTTY
+    )
+    const ptyArgs = usePty ? ptyCommand(commandArgs) : null
+    const executedArgs = ptyArgs || commandArgs
 
-    child = execute.execa(commandArgs[0], commandArgs.slice(1), {
+    child = execute.execa(executedArgs[0], executedArgs.slice(1), {
       stdio: ['inherit', redactStdout ? 'pipe' : 'inherit', redactStderr ? 'pipe' : 'inherit'],
       buffer: false,
       env: { ...process.env, ...env }
