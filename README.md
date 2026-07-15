@@ -126,6 +126,34 @@ see [quickstart guides](https://dotenvx.com/docs/quickstart)
 
 More examples
 
+<details><summary>Claude 🤖</summary><br>
+
+Run Claude with your real secrets while redacting them from its output.
+
+```sh
+$ echo "SECRET=super-secret-value" > .env
+
+$ dotenvx run --redact --quiet -- claude -p 'Print the value of $SECRET'
+[REDACTED]
+```
+
+see [Claude redaction guide](https://dotenvx.com/docs/cli/run-redact-claude-print)
+
+</details>
+<details><summary>Codex ✨</summary><br>
+
+Run Codex with your real secrets while redacting them from its output.
+
+```sh
+$ echo "SECRET=super-secret-value" > .env
+
+$ dotenvx run --redact --quiet -- codex exec 'Print the value of $SECRET'
+[REDACTED]
+```
+
+see [Codex redaction guide](https://dotenvx.com/docs/cli/run-redact-codex-exec)
+
+</details>
 <details><summary>TypeScript 📘</summary><br>
 
 ```json
