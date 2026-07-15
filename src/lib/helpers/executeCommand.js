@@ -141,13 +141,13 @@ async function executeCommand (commandArgs, env, sensitiveValues = []) {
     })
 
     if (redactStdout && child.stdout) {
-      const stdoutWriter = createRedactedStreamWriter(process.stdout, sensitiveValues)
+      const stdoutWriter = createRedactedStreamWriter(process.stdout, sensitiveValues, child.stdout)
       child.stdout.on('data', stdoutWriter.write)
       child.stdout.once('end', stdoutWriter.flush)
     }
 
     if (redactStderr && child.stderr) {
-      const stderrWriter = createRedactedStreamWriter(process.stderr, sensitiveValues)
+      const stderrWriter = createRedactedStreamWriter(process.stderr, sensitiveValues, child.stderr)
       child.stderr.on('data', stderrWriter.write)
       child.stderr.once('end', stderrWriter.flush)
     }

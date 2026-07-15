@@ -1487,6 +1487,8 @@ $ dotenvx run --redact --quiet -- node index.js
 
 Redaction is off by default. It applies only to values that were encrypted, successfully decrypted, and injected. Plaintext values are left unchanged. Matching is exact, so transformed or derived values are not redacted.
 
+Because redaction filters stdout and stderr, interactive commands that require a TTY may behave differently.
+
 </details>
 <details><summary>`run --mask`</summary><br>
 

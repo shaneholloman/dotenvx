@@ -1,4 +1,5 @@
 const redact = require('./redact')
+const { StringDecoder } = require('string_decoder')
 
 function normalizedValues (values) {
   return [...new Set((values || [])
@@ -70,18 +71,35 @@ function safeBoundary (value, boundary, sensitiveValues) {
   return result
 }
 
-function createRedactedStreamWriter (stream, sensitiveValues) {
+function createRedactedStreamWriter (stream, sensitiveValues, source) {
   const values = normalizedValues(sensitiveValues)
+  const decoder = new StringDecoder('utf8')
   let pending = ''
+  let waitingForDrain = false
+
+  const writeToStream = (value) => {
+    if (!value) return
+
+    const canContinue = stream.write(redactOutput(value, values))
+    if (!canContinue && source && !waitingForDrain) {
+      waitingForDrain = true
+      source.pause()
+      stream.once('drain', () => {
+        waitingForDrain = false
+        source.resume()
+      })
+    }
+  }
 
   const flush = () => {
+    pending += decoder.end()
     if (!pending) return
-    stream.write(redactOutput(pending, values))
+    writeToStream(pending)
     pending = ''
   }
 
   const write = (chunk) => {
-    pending += chunk.toString()
+    pending += Buffer.isBuffer(chunk) ? decoder.write(chunk) : `${chunk}`
 
     const holdbackLength = partialMatchLength(pending, values)
     let boundary = pending.length - holdbackLength
@@ -90,7 +108,7 @@ function createRedactedStreamWriter (stream, sensitiveValues) {
     const output = pending.slice(0, boundary)
     pending = pending.slice(boundary)
 
-    if (output) stream.write(redactOutput(output, values))
+    writeToStream(output)
   }
 
   return { write, flush }
