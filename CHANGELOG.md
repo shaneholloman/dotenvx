@@ -8,6 +8,7 @@ All notable changes to this project will be documented in this file. See [standa
 
 ### Changed
 
+* Redact all keys by default - except those ending in `_PLAIN` ([460862](https://github.com/dotenvx/dotenvx/commit/4608625845367d9205aa668826bf46ed0e5bb740))
 * Simplify default encrypted .env file to just `HELLO="World"` ([#899](https://github.com/dotenvx/dotenvx/pull/899))
 
 ## [2.11.0](https://github.com/dotenvx/dotenvx/compare/v2.10.0...v2.11.0) (2026-07-15)
