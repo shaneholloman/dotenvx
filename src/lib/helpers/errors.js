@@ -12,6 +12,7 @@ const ISSUE_BY_CODE = {
   MALFORMED_ENCRYPTED_DATA: 'https://github.com/dotenvx/dotenvx/issues/467',
   MISPAIRED_PRIVATE_KEY: 'https://github.com/dotenvx/dotenvx/issues/752',
   MISSING_DIRECTORY: 'https://github.com/dotenvx/dotenvx/issues/758',
+  MISSING_ENV_EXAMPLE: 'https://github.com/dotenvx/dotenvx/issues/905',
   MISSING_ENV_FILE: 'https://github.com/dotenvx/dotenvx/issues/484',
   MISSING_ENV_KEYS_FILE: 'https://github.com/dotenvx/dotenvx/issues/775',
   MISSING_ENV_FILES: 'https://github.com/dotenvx/dotenvx/issues/760',
@@ -22,6 +23,7 @@ const ISSUE_BY_CODE = {
   MISSING_VALUE: 'https://github.com/dotenvx/dotenvx/issues/864',
   FILE_NOT_WRITABLE: 'https://github.com/dotenvx/dotenvx/issues/890',
   PRECOMMIT_HOOK_MODIFY_FAILED: 'try again or report error',
+  VALIDATION_FAILED: 'https://github.com/dotenvx/dotenvx/issues/907',
   WRONG_PRIVATE_KEY: 'https://github.com/dotenvx/dotenvx/issues/466'
 }
 
@@ -207,6 +209,18 @@ class Errors {
     return e
   }
 
+  missingEnvExample () {
+    const code = 'MISSING_ENV_EXAMPLE'
+    const message = `[${code}] missing .env.example file`
+    const help = `fix: [${ISSUE_BY_CODE[code]}]`
+
+    const e = new Error(message)
+    e.code = code
+    e.help = help
+    e.messageWithHelp = `${message}. ${help}`
+    return e
+  }
+
   missingEnvKeysFile () {
     const code = 'MISSING_ENV_KEYS_FILE'
     const envKeysFilepath = this.envKeysFilepath || '.env.keys'
@@ -296,6 +310,18 @@ class Errors {
   missingValue () {
     const code = 'MISSING_VALUE'
     const message = `[${code}] missing value (${this.key})`
+    const help = `fix: [${ISSUE_BY_CODE[code]}]`
+
+    const e = new Error(message)
+    e.code = code
+    e.help = help
+    e.messageWithHelp = `${message}. ${help}`
+    return e
+  }
+
+  validationFailed () {
+    const code = 'VALIDATION_FAILED'
+    const message = `[${code}] ${this.message}`
     const help = `fix: [${ISSUE_BY_CODE[code]}]`
 
     const e = new Error(message)

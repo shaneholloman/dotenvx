@@ -15,6 +15,7 @@ const maskEnvSrc = require('../../lib/helpers/maskEnvSrc')
 const maskProcessedEnvs = require('../../lib/helpers/maskProcessedEnvs')
 const redactedValues = require('../../lib/helpers/redactedValues')
 const { redactOutput } = require('../../lib/helpers/redactOutput')
+const validateEnvExample = require('../../lib/helpers/validateEnvExample')
 
 const { determine } = require('./../../lib/helpers/envResolution')
 
@@ -133,6 +134,20 @@ async function run () {
     if (maskEnabled) {
       commandEnv = { ...process.env }
       maskProcessedEnvs(processedEnvs, commandEnv, showChar)
+    }
+
+    if (options.validate) {
+      const error = validateEnvExample(process.env)
+
+      if (error) {
+        if (ignore.includes(error.code)) {
+          logger.verbose(`ignored: ${error.message}`)
+        } else if (options.strict) {
+          throw error
+        } else {
+          logger.error(error.messageWithHelp || error.message)
+        }
+      }
     }
 
     for (const processedEnv of processedEnvs) {
