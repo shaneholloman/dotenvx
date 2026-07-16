@@ -1479,6 +1479,29 @@ $ dotenvx run --validate --strict -- node index.js
 Any inline comment containing the word `optional` marks that key as optional. If `.env.example` is missing, dotenvx reports `MISSING_ENV_EXAMPLE`. An empty `.env.example` is valid and declares no required variables.
 
 </details>
+<details><summary>`validate`</summary><br>
+
+Validate `.env` file(s) against `.env.example` without running a command.
+
+```ini
+# .env.example
+DATABASE_URL=
+API_KEY=
+SENTRY_DSN= # optional
+```
+
+```sh
+$ dotenvx validate
+[VALIDATION_FAILED] missing required (DATABASE_URL, API_KEY). fix: [https://github.com/dotenvx/dotenvx/issues/907]
+```
+
+Use `-f` and `-fk` to validate a specific env file and keys file. The command exits with code `1` when validation fails and prints errors to stderr. On success, it exits with code `0`.
+
+```sh
+$ dotenvx validate -f .env.production -fk .env.keys
+```
+
+</details>
 <details><summary>`run --strict`</summary><br>
 
 Exit with code `1` if any errors are encountered - like a missing .env file or decryption failure.
@@ -2850,9 +2873,10 @@ Commands:
   decrypt            decrypt .env file(s)
   keypair [KEY]      print public/private keys for .env file(s)
   ls [directory]     print all .env files in a tree structure
+  gitignore          append to .gitignore
   genexample [directory]
                      generate .env.example
-  gitignore          append to .gitignore
+  validate           validate .env file(s) against .env.example
   precommit [directory]
                      prevent committing .env files to code
   prebuild [directory]

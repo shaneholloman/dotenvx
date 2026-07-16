@@ -183,6 +183,15 @@ program.command('ls')
     return require('./actions/ls').apply(this, args)
   })
 
+// dotenvx gitignore
+program.command('gitignore')
+  .description('append to .gitignore')
+  .addHelpText('after', examples.gitignore)
+  .option('--pattern <patterns...>', 'pattern(s) to gitignore', ['.env*'])
+  .action(function (...args) {
+    return require('./actions/ext/gitignore').apply(this, args)
+  })
+
 // dotenvx genexample
 program.command('genexample')
   .description('generate .env.example')
@@ -192,13 +201,21 @@ program.command('genexample')
     return require('./actions/ext/genexample').apply(this, args)
   })
 
-// dotenvx gitignore
-program.command('gitignore')
-  .description('append to .gitignore')
-  .addHelpText('after', examples.gitignore)
-  .option('--pattern <patterns...>', 'pattern(s) to gitignore', ['.env*'])
+// dotenvx validate
+program.command('validate')
+  .description('validate .env file(s) against .env.example')
+  .option('-e, --env <strings...>', 'environment variable(s) set as string (example: "HELLO=World")', collectEnvs('env'), [])
+  .option('-f, --env-file <path>', 'path(s) to your env file(s)', collectEnvs('envFile'), [])
+  .option('-fk, --env-keys-file <path>', 'path(s) to your .env.keys file(s) (default: same path as your env file)', collectEnvKeys)
+  .option('-o, --overload', 'override existing env variables (by default, existing env vars take precedence over .env files)')
+  .option('--convention <name>', 'load a .env convention (available conventions: [\'nextjs\', \'flow\'])')
+  .option('--ignore <errorCodes...>', 'error code(s) to ignore (example: --ignore=MISSING_ENV_FILE)')
+  .option('--token <token>', 'set Armor ⛨ token')
+  .option('--no-armor', 'disable Dotenvx Armor features')
+  .option('--no-native', 'disable OS secret store features')
   .action(function (...args) {
-    return require('./actions/ext/gitignore').apply(this, args)
+    this.envs = envs
+    return require('./actions/validate').apply(this, args)
   })
 
 // dotenvx precommit
